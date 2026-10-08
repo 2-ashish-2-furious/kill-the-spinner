@@ -1,0 +1,2 @@
+# Vendored, pre-bundled third-party code for the self-contained talk demos.
+talk/demos/**/vendor/**

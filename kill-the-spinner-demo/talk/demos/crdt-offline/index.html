@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRDT offline merge — two peers, one page</title>
+    <style>
+      :root {
+        --bg: #07090d;
+        --panel: #111823;
+        --panel-2: #0d141d;
+        --line: #26313f;
+        --text: #eef4fb;
+        --dim: #8fa3ba;
+        --a: #4cc9f0;
+        --b: #c77dff;
+        --on: #35d07f;
+        --off: #ff5c5c;
+        --merge: #2f81f7;
+        --warn: #ffb84d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font:
+          500 24px/1.3 ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button {
+        font: inherit;
+        color: inherit;
+        border: 2px solid var(--line);
+        background: #1a232f;
+        border-radius: 12px;
+        padding: 10px 18px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      button:hover {
+        background: #24303f;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      button[disabled] {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      /* ---------- top bar ---------- */
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 14px 22px;
+        border-bottom: 2px solid var(--line);
+        background: var(--panel-2);
+        flex: 0 0 auto;
+      }
+
+      #status {
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        padding: 6px 20px;
+        border-radius: 14px;
+        border: 3px solid;
+        transition: background 0.2s;
+      }
+
+      #status.sync {
+        color: var(--on);
+        border-color: var(--on);
+        background: #35d07f1a;
+      }
+
+      #status.diverged {
+        color: var(--warn);
+        border-color: var(--warn);
+        background: #ffb84d1a;
+      }
+
+      #status.merged {
+        color: #fff;
+        border-color: var(--merge);
+        background: var(--merge);
+        animation: mergePulse 1.6s ease-out;
+      }
+
+      @keyframes mergePulse {
+        0% {
+          box-shadow: 0 0 0 0 var(--merge);
+        }
+        100% {
+          box-shadow: 0 0 0 26px transparent;
+        }
+      }
+
+      header .spacer {
+        flex: 1;
+      }
+
+      header .tools {
+        display: flex;
+        gap: 12px;
+      }
+
+      #libsrc {
+        font-size: 18px;
+        color: var(--dim);
+        font-weight: 600;
+      }
+
+      #libsrc b {
+        color: var(--text);
+      }
+
+      /* ---------- panes ---------- */
+
+      main {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        padding: 18px 22px 22px;
+        min-height: 0;
+      }
+
+      .pane {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: var(--panel);
+        border: 3px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+
+      .pane.A {
+        border-color: color-mix(in srgb, var(--a) 45%, var(--line));
+      }
+
+      .pane.B {
+        border-color: color-mix(in srgb, var(--b) 45%, var(--line));
+      }
+
+      .pane.offline {
+        border-style: dashed;
+        border-color: var(--off);
+        background: repeating-linear-gradient(
+          135deg,
+          var(--panel),
+          var(--panel) 22px,
+          #171b24 22px,
+          #171b24 44px
+        );
+      }
+
+      .pane-head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px 12px;
+      }
+
+      .pane-name {
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+
+      .pane.A .pane-name {
+        color: var(--a);
+      }
+
+      .pane.B .pane-name {
+        color: var(--b);
+      }
+
+      .net {
+        margin-left: auto;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        border-width: 3px;
+        border-radius: 999px;
+        padding: 10px 26px;
+      }
+
+      .net.on {
+        color: #04170d;
+        background: var(--on);
+        border-color: var(--on);
+      }
+
+      .net.off {
+        color: #1a0505;
+        background: var(--off);
+        border-color: var(--off);
+      }
+
+      .queues {
+        display: flex;
+        gap: 14px;
+        padding: 0 20px 14px;
+      }
+
+      .q {
+        font-size: 24px;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 10px;
+        border: 2px solid var(--line);
+        color: var(--dim);
+        background: #0c121b;
+      }
+
+      .q.hot {
+        color: #1a1200;
+        background: var(--warn);
+        border-color: var(--warn);
+      }
+
+      /* ---------- list ---------- */
+
+      ul.list {
+        list-style: none;
+        margin: 0;
+        padding: 0 12px 18px;
+        flex: 1 1 auto;
+        overflow-y: auto;
+        min-height: 0;
+      }
+
+      li.row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 10px;
+        border-radius: 12px;
+        border-left: 8px solid transparent;
+      }
+
+      li.row + li.row {
+        border-top: 2px solid #1c2430;
+      }
+
+      li.row.merged {
+        animation: rowMerge 1.7s ease-out;
+      }
+
+      @keyframes rowMerge {
+        0%,
+        18% {
+          background: var(--merge);
+          border-left-color: #cfe4ff;
+        }
+        100% {
+          background: transparent;
+          border-left-color: transparent;
+        }
+      }
+
+      .check {
+        flex: 0 0 auto;
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        font-size: 26px;
+        line-height: 1;
+        padding: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .check.done {
+        background: var(--on);
+        border-color: var(--on);
+        color: #04170d;
+      }
+
+      .title {
+        flex: 1 1 auto;
+        font-size: 30px;
+        font-weight: 600;
+        word-break: break-word;
+      }
+
+      li.row.is-done .title {
+        text-decoration: line-through;
+        color: var(--dim);
+      }
+
+      .idx {
+        flex: 0 0 auto;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--warn);
+        width: 26px;
+        text-align: center;
+      }
+
+      li.row.target {
+        border-left-color: var(--warn);
+      }
+
+      li.row.target.merged {
+        border-left-color: #cfe4ff;
+      }
+
+      input {
+        font: inherit;
+        color: var(--text);
+        background: #0a0f16;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 14px;
+        min-width: 0;
+      }
+
+      input:focus {
+        outline: 3px solid var(--merge);
+      }
+
+      input.edit {
+        flex: 1 1 auto;
+        font-size: 30px;
+      }
+
+      .mini {
+        flex: 0 0 auto;
+        font-size: 22px;
+        padding: 8px 12px;
+        color: var(--dim);
+      }
+
+      .empty {
+        padding: 28px 14px;
+        color: var(--dim);
+        font-size: 26px;
+      }
+
+      /* ---------- pane footer ---------- */
+
+      .pane-foot {
+        display: flex;
+        gap: 10px;
+        padding: 12px 16px 16px;
+        border-top: 2px solid var(--line);
+        background: var(--panel-2);
+      }
+
+      .pane-foot .add {
+        flex: 1 1 auto;
+        display: flex;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .pane-foot .add input {
+        flex: 1 1 auto;
+        font-size: 24px;
+      }
+
+      .pane-actions {
+        display: flex;
+        gap: 10px;
+        padding: 0 16px 14px;
+      }
+
+      .pane-actions button {
+        font-size: 22px;
+      }
+
+      .clash {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+
+      #note {
+        position: fixed;
+        left: 50%;
+        bottom: 3px;
+        transform: translateX(-50%);
+        z-index: 5;
+        pointer-events: none;
+        background: var(--warn);
+        color: #1a1200;
+        font-size: 20px;
+        font-weight: 700;
+        padding: 6px 18px;
+        border-radius: 10px;
+        display: none;
+        max-width: 90vw;
+      }
+
+      /* Scale down proportionally on 720p-class projectors so the same number
+         of rows stays on screen without scrolling. */
+      @media (max-height: 1000px) {
+        header {
+          padding: 10px 16px;
+          gap: 14px;
+        }
+        #status {
+          font-size: 27px;
+          padding: 4px 16px;
+        }
+        header button {
+          font-size: 21px;
+          padding: 8px 14px;
+        }
+        main {
+          padding: 12px 16px 14px;
+          gap: 12px;
+        }
+        .pane-head {
+          padding: 10px 16px 8px;
+        }
+        .pane-name {
+          font-size: 32px;
+        }
+        .net {
+          font-size: 22px;
+          padding: 7px 20px;
+        }
+        .queues {
+          padding: 0 16px 10px;
+        }
+        .q {
+          font-size: 20px;
+          padding: 4px 12px;
+        }
+        li.row {
+          padding: 8px;
+          gap: 10px;
+        }
+        .title,
+        input.edit {
+          font-size: 25px;
+        }
+        .check {
+          width: 38px;
+          height: 38px;
+          font-size: 22px;
+        }
+        .idx {
+          font-size: 22px;
+          width: 22px;
+        }
+        .mini {
+          font-size: 18px;
+          padding: 6px 10px;
+        }
+        .pane-actions {
+          padding: 0 14px 12px;
+        }
+        .pane-actions button {
+          font-size: 20px;
+          padding: 8px 14px;
+        }
+        .pane-foot {
+          padding: 10px 14px 12px;
+        }
+        .pane-foot .add input,
+        .pane-foot button {
+          font-size: 21px;
+        }
+      }
+
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        font-size: 34px;
+        color: var(--dim);
+        z-index: 10;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div id="status" class="sync">A ≡ B &nbsp;IN SYNC</div>
+      <div class="spacer"></div>
+      <div id="libsrc"></div>
+      <div class="tools">
+        <button
+          id="clashBoth"
+          class="clash"
+          title="A appends, B prepends — same item, same instant"
+        >
+          ⚡ Clash both
+        </button>
+        <button id="bothOff" title="Take both clients offline">
+          ◐ Both offline
+        </button>
+        <button id="bothOn" title="Bring both clients online">
+          ◉ Both online
+        </button>
+        <button id="reset" title="Clear IndexedDB and reseed">↻ Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="pane A" id="pane-A"></section>
+      <section class="pane B" id="pane-B"></section>
+    </main>
+
+    <div id="note"></div>
+    <div id="boot">loading…</div>
+
+    <script>
+      /* ------------------------------------------------------------------
+       * Library loading.
+       *
+       * Tries a CDN first (and functionally smoke-tests it), then falls back
+       * to the vendored bundle in ./vendor/yjs-bundle.js. The vendored copy is
+       * the one that matters: with wifi off, or when opened over file://
+       * (where dynamic import() of a cross-origin module is blocked), the CDN
+       * attempt fails within milliseconds and we use the local bundle.
+       *
+       * Force either path with ?src=local or ?src=cdn.
+       * ------------------------------------------------------------------ */
+
+      const YJS_VERSION = "13.6.32"
+      const YIDB_VERSION = "9.0.12"
+      const CDN_TIMEOUT_MS = 1500
+
+      let Y = null
+      let IndexeddbPersistence = null
+      let libSource = "unknown"
+      let persistence = true
+
+      const withTimeout = (p, ms, what) =>
+        Promise.race([
+          p,
+          new Promise((_, rej) =>
+            setTimeout(() => rej(new Error("timeout: " + what)), ms)
+          ),
+        ])
+
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement("script")
+          s.src = src
+          s.onload = resolve
+          s.onerror = () => reject(new Error("failed to load " + src))
+          document.head.appendChild(s)
+        })
+      }
+
+      async function tryCdn() {
+        const [ymod, imod] = await withTimeout(
+          Promise.all([
+            import(`https://cdn.jsdelivr.net/npm/yjs@${YJS_VERSION}/+esm`),
+            import(
+              `https://cdn.jsdelivr.net/npm/y-indexeddb@${YIDB_VERSION}/+esm`
+            ),
+          ]),
+          CDN_TIMEOUT_MS,
+          "cdn import"
+        )
+        if (
+          typeof ymod.Doc !== "function" ||
+          typeof imod.IndexeddbPersistence !== "function"
+        ) {
+          throw new Error("cdn modules missing expected exports")
+        }
+        // Smoke test: the two CDN modules must share one Yjs instance, otherwise
+        // y-indexeddb would silently mis-handle docs created by the other copy.
+        const probeDoc = new ymod.Doc()
+        const probe = new imod.IndexeddbPersistence(
+          "__crdt_demo_probe__",
+          probeDoc
+        )
+        await withTimeout(probe.whenSynced, CDN_TIMEOUT_MS, "cdn probe")
+        await probe.clearData()
+        return {
+          Y: ymod,
+          IndexeddbPersistence: imod.IndexeddbPersistence,
+          source: "CDN",
+        }
+      }
+
+      async function loadLibs() {
+        const want = new URLSearchParams(location.search).get("src")
+        if (want !== "local") {
+          try {
+            return await tryCdn()
+          } catch (err) {
+            console.info(
+              "[crdt-demo] CDN unavailable, using vendored bundle —",
+              err.message
+            )
+            if (want === "cdn") note("CDN load failed — using vendored copy")
+          }
+        }
+        await loadScript("./vendor/yjs-bundle.js")
+        if (!globalThis.__CRDT_VENDOR__)
+          throw new Error("vendored bundle did not initialise")
+        return globalThis.__CRDT_VENDOR__
+      }
+
+      /* ------------------------------------------------------------------
+       * Peers. Two Y.Docs in this page. No network, no signalling: updates
+       * move through transmit()/applyRemote() below, and a pane that is
+       * "offline" queues them instead.
+       * ------------------------------------------------------------------ */
+
+      const REMOTE = { tag: "remote" } // transaction origin for merged-in updates
+      const SEED = { tag: "seed" } // transaction origin for initial data
+
+      const SEED_ITEMS = [
+        { title: "Rehearse the demo", done: false },
+        { title: "Charge the laptop", done: false },
+        { title: "Test the projector", done: true },
+        { title: "Print speaker notes", done: false },
+      ]
+
+      const peers = { A: null, B: null }
+      const both = () => [peers.A, peers.B]
+      const otherOf = (p) => (p.key === "A" ? peers.B : peers.A)
+
+      function makePeer(key) {
+        return {
+          key,
+          label: "Client " + key,
+          dbName: "crdt-offline-demo-" + key,
+          doc: null,
+          provider: null,
+          online: true,
+          outbox: [], // my edits, not yet transmitted (I am offline)
+          inbox: [], // their edits, waiting for me to come online
+          editingId: null,
+          flash: new Set(),
+          flashTimer: null,
+          el: {},
+        }
+      }
+
+      function snapshot(peer) {
+        if (!peer.doc) return []
+        return peer.doc
+          .getArray("items")
+          .toArray()
+          .map((m) => {
+            const t = m.get("title")
+            return {
+              id: m.get("id"),
+              title: t && typeof t.toString === "function" ? t.toString() : "",
+              done: !!m.get("done"),
+            }
+          })
+      }
+
+      function findItem(peer, id) {
+        return peer.doc
+          .getArray("items")
+          .toArray()
+          .find((m) => m.get("id") === id)
+      }
+
+      /* ----- the in-page channel ----- */
+
+      function onLocalUpdate(peer, update) {
+        if (peer.online) transmit(peer, [update])
+        else peer.outbox.push(update)
+        renderAll()
+      }
+
+      function transmit(from, updates) {
+        const to = otherOf(from)
+        if (to.online) applyRemote(to, updates)
+        else to.inbox.push(...updates)
+      }
+
+      function applyRemote(peer, updates) {
+        if (!updates.length) return
+        const before = new Map(
+          snapshot(peer).map((i) => [i.id, i.title + "|" + i.done])
+        )
+        peer.doc.transact(() => {
+          for (const u of updates) Y.applyUpdate(peer.doc, u, REMOTE)
+        }, REMOTE)
+        const changed = snapshot(peer)
+          .filter((i) => before.get(i.id) !== i.title + "|" + i.done)
+          .map((i) => i.id)
+        if (changed.length) markMerged(peer, changed)
+      }
+
+      function markMerged(peer, ids) {
+        ids.forEach((id) => peer.flash.add(id))
+        document.getElementById("status").classList.add("merged")
+        clearTimeout(peer.flashTimer)
+        peer.flashTimer = setTimeout(() => {
+          peer.flash.clear()
+          document.getElementById("status").classList.remove("merged")
+          renderAll()
+        }, 1700)
+      }
+
+      // Online/offline is remembered, so a full page reload (Cmd-R) mid-demo
+      // comes back offline instead of silently reconnecting on you.
+      const NET_KEY = "crdt-offline-demo-net"
+
+      function saveNet() {
+        try {
+          localStorage.setItem(
+            NET_KEY,
+            JSON.stringify({ A: peers.A.online, B: peers.B.online })
+          )
+        } catch (err) {
+          /* file:// with storage disabled — not fatal */
+        }
+      }
+
+      function loadNet() {
+        try {
+          return JSON.parse(localStorage.getItem(NET_KEY) || "null")
+        } catch (err) {
+          return null
+        }
+      }
+
+      function setOnline(peer, value) {
+        if (peer.online === value) return
+        peer.online = value
+        saveNet()
+        if (value) flush()
+        renderAll()
+      }
+
+      function flush() {
+        // 1. every online peer transmits whatever it queued while offline
+        for (const p of both()) {
+          if (!p.online || !p.outbox.length) continue
+          transmit(p, p.outbox.splice(0))
+        }
+        // 2. every online peer drains what was waiting for it
+        for (const p of both()) {
+          if (!p.online || !p.inbox.length) continue
+          applyRemote(p, p.inbox.splice(0))
+        }
+        // 3. both online: state-vector reconciliation, so convergence does not
+        //    depend on the raw queues being complete (e.g. after a reload).
+        if (peers.A.online && peers.B.online) {
+          const a = peers.A
+          const b = peers.B
+          const forB = Y.encodeStateAsUpdate(a.doc, Y.encodeStateVector(b.doc))
+          const forA = Y.encodeStateAsUpdate(b.doc, Y.encodeStateVector(a.doc))
+          applyRemote(b, [forB])
+          applyRemote(a, [forA])
+        }
+      }
+
+      /* ----- edits ----- */
+
+      function addItem(peer, text) {
+        const title = text.trim()
+        if (!title) return
+        const m = new Y.Map()
+        peer.doc.transact(() => {
+          peer.doc.getArray("items").push([m])
+          m.set("id", "i" + Math.random().toString(36).slice(2, 9))
+          m.set("title", new Y.Text(title))
+          m.set("done", false)
+        })
+      }
+
+      function toggleItem(peer, id) {
+        const m = findItem(peer, id)
+        if (m) m.set("done", !m.get("done"))
+      }
+
+      function deleteItem(peer, id) {
+        const arr = peer.doc.getArray("items")
+        const idx = arr.toArray().findIndex((m) => m.get("id") === id)
+        if (idx >= 0) arr.delete(idx, 1)
+      }
+
+      // Character-level edit: diff against the current Y.Text so concurrent
+      // edits to the same title merge instead of overwriting.
+      function setTitle(peer, id, next) {
+        const m = findItem(peer, id)
+        if (!m) return
+        const t = m.get("title")
+        const cur = t.toString()
+        if (cur === next) return
+        let pre = 0
+        while (pre < cur.length && pre < next.length && cur[pre] === next[pre])
+          pre++
+        let suf = 0
+        while (
+          suf < cur.length - pre &&
+          suf < next.length - pre &&
+          cur[cur.length - 1 - suf] === next[next.length - 1 - suf]
+        )
+          suf++
+        peer.doc.transact(() => {
+          const delLen = cur.length - pre - suf
+          if (delLen > 0) t.delete(pre, delLen)
+          const ins = next.slice(pre, next.length - suf)
+          if (ins) t.insert(pre, ins)
+        })
+      }
+
+      // One click, guaranteed same-item collision: A appends at the end,
+      // B inserts at the start, both into item ①.
+      function clash(peer) {
+        const items = snapshot(peer)
+        if (!items.length) return note("Nothing to edit — add an item first")
+        const m = findItem(peer, items[0].id)
+        const t = m.get("title")
+        if (peer.key === "A") t.insert(t.length, " — ship it")
+        else t.insert(0, "URGENT: ")
+      }
+
+      /* ------------------------------------------------------------------
+       * Persistence (y-indexeddb)
+       * ------------------------------------------------------------------ */
+
+      function attachDoc(peer, doc) {
+        peer.doc = doc
+        doc.on("update", (update, origin) => {
+          if (
+            origin === REMOTE ||
+            origin === SEED ||
+            origin === peer.provider
+          ) {
+            renderAll()
+            return
+          }
+          onLocalUpdate(peer, update)
+        })
+      }
+
+      async function openPeer(peer) {
+        attachDoc(peer, new Y.Doc())
+        if (!persistence) return
+        try {
+          const provider = new IndexeddbPersistence(peer.dbName, peer.doc)
+          peer.provider = provider
+          await withTimeout(
+            provider.whenSynced,
+            5000,
+            "indexeddb " + peer.dbName
+          )
+        } catch (err) {
+          console.warn("[crdt-demo] IndexedDB unavailable:", err)
+          peer.provider = null
+          persistence = false
+          note(
+            "IndexedDB unavailable here — merge works, durability does not. Serve over http instead of file://"
+          )
+        }
+      }
+
+      // Reload just this pane's document from IndexedDB. The page keeps
+      // running, so queue counters and the other pane are untouched.
+      async function reloadPeer(peer) {
+        if (!peer.provider) return note("No IndexedDB in this browser context")
+        peer.editingId = null
+        const old = peer.doc
+        try {
+          await peer.provider.destroy()
+        } catch (err) {
+          console.warn(err)
+        }
+        peer.provider = null
+        try {
+          old.destroy()
+        } catch (err) {
+          console.warn(err)
+        }
+        attachDoc(peer, new Y.Doc())
+        const provider = new IndexeddbPersistence(peer.dbName, peer.doc)
+        peer.provider = provider
+        try {
+          await withTimeout(provider.whenSynced, 5000, "reload " + peer.dbName)
+        } catch (err) {
+          console.warn(err)
+        }
+        markMerged(
+          peer,
+          snapshot(peer).map((i) => i.id)
+        )
+        renderAll()
+      }
+
+      function deleteDb(name) {
+        return new Promise((resolve) => {
+          let done = false
+          const finish = () => {
+            if (!done) {
+              done = true
+              resolve()
+            }
+          }
+          try {
+            const req = indexedDB.deleteDatabase(name)
+            req.onsuccess = finish
+            req.onerror = finish
+            req.onblocked = finish
+          } catch (err) {
+            finish()
+          }
+          setTimeout(finish, 2500)
+        })
+      }
+
+      async function resetDemo() {
+        for (const p of both()) {
+          if (!p) continue
+          if (p.provider) {
+            try {
+              await p.provider.destroy()
+            } catch (err) {
+              console.warn(err)
+            }
+            p.provider = null
+          }
+          try {
+            p.doc.destroy()
+          } catch (err) {
+            console.warn(err)
+          }
+        }
+        await Promise.all([
+          deleteDb("crdt-offline-demo-A"),
+          deleteDb("crdt-offline-demo-B"),
+        ])
+        try {
+          localStorage.removeItem(NET_KEY)
+        } catch (err) {
+          /* ignore */
+        }
+        peers.A = makePeer("A")
+        peers.B = makePeer("B")
+        buildPane(peers.A)
+        buildPane(peers.B)
+        await openPeer(peers.A)
+        await openPeer(peers.B)
+        seed(true)
+        renderAll()
+        note("Reset — clean slate, both online")
+      }
+
+      // Identical seed applied to both docs, so the two replicas start with
+      // the same item ids and merging is not a first-sync duplication test.
+      function seed(force) {
+        const empty = both().every((p) => snapshot(p).length === 0)
+        if (!empty && !force) return
+        const seedDoc = new Y.Doc()
+        seedDoc.transact(() => {
+          const arr = seedDoc.getArray("items")
+          SEED_ITEMS.forEach((it, n) => {
+            const m = new Y.Map()
+            arr.push([m])
+            m.set("id", "seed" + n)
+            m.set("title", new Y.Text(it.title))
+            m.set("done", it.done)
+          })
+        })
+        const update = Y.encodeStateAsUpdate(seedDoc)
+        for (const p of both()) Y.applyUpdate(p.doc, update, SEED)
+      }
+
+      /* ------------------------------------------------------------------
+       * UI
+       * ------------------------------------------------------------------ */
+
+      function buildPane(peer) {
+        const root = document.getElementById("pane-" + peer.key)
+        root.innerHTML = `
+          <div class="pane-head">
+            <div class="pane-name">${peer.label}</div>
+            <button class="net" data-net>ONLINE</button>
+          </div>
+          <div class="queues">
+            <div class="q" data-out>▲ 0 unsent</div>
+            <div class="q" data-in>▼ 0 incoming</div>
+          </div>
+          <ul class="list" data-list></ul>
+          <div class="pane-actions">
+            <button class="clash" data-clash>⚡ Edit item ①</button>
+            <button data-reload>↻ Reload ${peer.key} from disk</button>
+          </div>
+          <div class="pane-foot">
+            <div class="add">
+              <input data-new placeholder="new item…" aria-label="new item for ${peer.label}" />
+              <button data-add>+ Add</button>
+            </div>
+          </div>`
+
+        const q = (sel) => root.querySelector(sel)
+        peer.el = {
+          root,
+          net: q("[data-net]"),
+          out: q("[data-out]"),
+          in: q("[data-in]"),
+          list: q("[data-list]"),
+          newInput: q("[data-new]"),
+        }
+
+        peer.el.net.addEventListener("click", () =>
+          setOnline(peer, !peer.online)
+        )
+        q("[data-clash]").addEventListener("click", () => clash(peer))
+        q("[data-reload]").addEventListener("click", () => reloadPeer(peer))
+        q("[data-add]").addEventListener("click", () => {
+          addItem(peer, peer.el.newInput.value)
+          peer.el.newInput.value = ""
+          peer.el.newInput.focus()
+        })
+        peer.el.newInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            addItem(peer, peer.el.newInput.value)
+            peer.el.newInput.value = ""
+          }
+        })
+
+        peer.el.list.addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-act]")
+          if (!btn) return
+          const id = btn.closest("li").dataset.id
+          const act = btn.dataset.act
+          if (act === "toggle") toggleItem(peer, id)
+          else if (act === "del") deleteItem(peer, id)
+          else if (act === "edit") {
+            peer.editingId = id
+            renderPane(peer)
+            const input = peer.el.list.querySelector("input.edit")
+            if (input) {
+              input.focus()
+              input.setSelectionRange(input.value.length, input.value.length)
+            }
+          }
+        })
+
+        peer.el.list.addEventListener("keydown", (e) => {
+          if (!e.target.classList.contains("edit")) return
+          if (e.key === "Enter") {
+            const id = peer.editingId
+            peer.editingId = null
+            setTitle(peer, id, e.target.value)
+            renderPane(peer)
+          } else if (e.key === "Escape") {
+            peer.editingId = null
+            renderPane(peer)
+          }
+        })
+      }
+
+      function renderPane(peer) {
+        const { el } = peer
+        el.root.classList.toggle("offline", !peer.online)
+        el.net.textContent = peer.online ? "ONLINE" : "OFFLINE"
+        el.net.className = "net " + (peer.online ? "on" : "off")
+        el.out.textContent = `▲ ${peer.outbox.length} unsent`
+        el.out.className = "q" + (peer.outbox.length ? " hot" : "")
+        el.in.textContent = `▼ ${peer.inbox.length} incoming`
+        el.in.className = "q" + (peer.inbox.length ? " hot" : "")
+
+        // preserve a focused edit box across the rebuild
+        const active = document.activeElement
+        const keep =
+          active &&
+          active.classList &&
+          active.classList.contains("edit") &&
+          el.list.contains(active)
+            ? {
+                value: active.value,
+                start: active.selectionStart,
+                end: active.selectionEnd,
+              }
+            : null
+
+        const items = snapshot(peer)
+        if (!items.length) {
+          el.list.innerHTML = '<li class="empty">empty</li>'
+          return
+        }
+        el.list.innerHTML = items
+          .map((it, n) => {
+            const cls = [
+              "row",
+              it.done ? "is-done" : "",
+              peer.flash.has(it.id) ? "merged" : "",
+              n === 0 ? "target" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")
+            const body =
+              peer.editingId === it.id
+                ? `<input class="edit" value="${esc(it.title)}" />`
+                : `<span class="title">${esc(it.title)}</span>`
+            return `<li class="${cls}" data-id="${it.id}">
+                <span class="idx">${n === 0 ? "①" : ""}</span>
+                <button class="check ${it.done ? "done" : ""}" data-act="toggle" title="toggle done">${it.done ? "✓" : ""}</button>
+                ${body}
+                <button class="mini" data-act="edit" title="edit text">edit</button>
+                <button class="mini" data-act="del" title="delete">✕</button>
+              </li>`
+          })
+          .join("")
+
+        if (keep) {
+          const input = el.list.querySelector("input.edit")
+          if (input) {
+            input.value = keep.value
+            input.focus()
+            input.setSelectionRange(keep.start, keep.end)
+          }
+        }
+      }
+
+      function renderGlobal() {
+        const status = document.getElementById("status")
+        const a = JSON.stringify(snapshot(peers.A))
+        const b = JSON.stringify(snapshot(peers.B))
+        const pending =
+          peers.A.outbox.length +
+          peers.A.inbox.length +
+          peers.B.outbox.length +
+          peers.B.inbox.length
+        const merging = status.classList.contains("merged")
+        status.classList.remove("sync", "diverged")
+        if (a === b) {
+          status.classList.add("sync")
+          status.innerHTML = "A ≡ B &nbsp;IN SYNC"
+        } else {
+          status.classList.add("diverged")
+          status.innerHTML = `A ≠ B &nbsp;DIVERGED${pending ? ` · ${pending} queued` : ""}`
+        }
+        if (merging) status.classList.add("merged")
+        document.getElementById("libsrc").innerHTML =
+          `yjs <b>${YJS_VERSION}</b> · ${libSource}${persistence ? "" : " · <b>no IndexedDB</b>"}`
+      }
+
+      let rafPending = false
+      function renderAll() {
+        if (rafPending) return
+        rafPending = true
+        requestAnimationFrame(() => {
+          rafPending = false
+          if (peers.A) renderPane(peers.A)
+          if (peers.B) renderPane(peers.B)
+          if (peers.A && peers.B) renderGlobal()
+        })
+      }
+
+      function esc(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c]
+        )
+      }
+
+      let noteTimer = null
+      function note(msg) {
+        const el = document.getElementById("note")
+        el.textContent = msg
+        el.style.display = "block"
+        clearTimeout(noteTimer)
+        noteTimer = setTimeout(() => (el.style.display = "none"), 4000)
+      }
+
+      /* ------------------------------------------------------------------
+       * Boot
+       * ------------------------------------------------------------------ */
+
+      async function boot() {
+        const lib = await loadLibs()
+        Y = lib.Y
+        IndexeddbPersistence = lib.IndexeddbPersistence
+        libSource = lib.source || "local vendor"
+
+        peers.A = makePeer("A")
+        peers.B = makePeer("B")
+        const net = loadNet()
+        if (net) {
+          peers.A.online = !!net.A
+          peers.B.online = !!net.B
+        }
+        buildPane(peers.A)
+        buildPane(peers.B)
+        await openPeer(peers.A)
+        await openPeer(peers.B)
+        seed(false)
+        // A pane that was offline when the page was reloaded stays offline and
+        // stays divergent — that is the point. Panes that are online converge.
+        if (peers.A.online && peers.B.online) flush()
+        renderAll()
+
+        document.getElementById("clashBoth").addEventListener("click", () => {
+          clash(peers.A)
+          clash(peers.B)
+        })
+        document
+          .getElementById("bothOff")
+          .addEventListener("click", () =>
+            both().forEach((p) => setOnline(p, false))
+          )
+        document
+          .getElementById("bothOn")
+          .addEventListener("click", () =>
+            both().forEach((p) => setOnline(p, true))
+          )
+        document.getElementById("reset").addEventListener("click", resetDemo)
+
+        // Stage shortcuts (ignored while typing)
+        document.addEventListener("keydown", (e) => {
+          if (
+            e.target.tagName === "INPUT" ||
+            e.metaKey ||
+            e.ctrlKey ||
+            e.altKey
+          )
+            return
+          const k = e.key.toLowerCase()
+          if (k === "1") setOnline(peers.A, !peers.A.online)
+          else if (k === "2") setOnline(peers.B, !peers.B.online)
+          else if (k === "c") {
+            clash(peers.A)
+            clash(peers.B)
+          } else if (k === "r") reloadPeer(peers.A)
+          else if (k === "o") both().forEach((p) => setOnline(p, false))
+          else if (k === "p") both().forEach((p) => setOnline(p, true))
+        })
+
+        document.getElementById("boot").remove()
+        // exposed for scripted verification
+        window.__demo = {
+          peers,
+          snapshot,
+          setOnline,
+          clash,
+          addItem,
+          reloadPeer,
+          resetDemo,
+          flush,
+        }
+      }
+
+      boot().catch((err) => {
+        document.getElementById("boot").textContent =
+          "failed to start: " + err.message
+        console.error(err)
+      })
+    </script>
+  </body>
+</html>

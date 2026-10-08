@@ -1,0 +1,2051 @@
+/* ─────────────────────────────────────────────────────────────
+   Local-First: Kill the Spinner — dark, editor-native theme
+   Fonts are vendored in public/fonts (no network at present time)
+   ───────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/instrument-serif-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-normal.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono-normal.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --bg: #0b0d10;
+  --bg-elev: #14181d;
+  --bg-code: #10141a;
+  --text: #e8eaed;
+  --dim: #9ba3ae;
+  --faint: #6b747f;
+  --line: #232a32;
+  --accent: #6aa9ff;
+  --accent-deep: #274b7d;
+  --warn: #ffb454;
+  --danger: #ff6b6b;
+  --good: #4ade80;
+
+  --serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* ── base ─────────────────────────────────────────────────── */
+
+.slidev-layout {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1.28rem;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  padding: 3rem 3.6rem;
+}
+
+/* Default (non-centred) slides: sit in the optical middle rather than
+   clinging to the top, so short slides don't leave a dead lower half. */
+.slidev-layout.default {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.slidev-layout.default > :first-child {
+  margin-top: 0;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.slidev-layout h1 {
+  font-size: 3.7rem;
+  line-height: 1.04;
+}
+.slidev-layout h2 {
+  font-size: 2.6rem;
+  line-height: 1.1;
+}
+.slidev-layout h3 {
+  font-size: 1.65rem;
+  color: var(--dim);
+}
+
+.slidev-layout strong {
+  font-weight: 600;
+  color: #fff;
+}
+.slidev-layout em {
+  font-style: italic;
+  color: var(--dim);
+}
+.slidev-layout a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-deep);
+}
+
+/* ── act label: the small eyebrow above each title ────────── */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, currentColor, transparent);
+  opacity: 0.35;
+}
+
+/* ── lists ────────────────────────────────────────────────── */
+
+.slidev-layout ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.9rem;
+}
+.slidev-layout ul > li {
+  position: relative;
+  padding-left: 1.35rem;
+  margin-bottom: 0.55rem;
+  color: var(--text);
+}
+.slidev-layout ul > li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 0.85em;
+  top: 0.12em;
+}
+.slidev-layout ul > li > ul {
+  margin-top: 0.4rem;
+}
+.slidev-layout ul > li > ul > li {
+  color: var(--dim);
+  font-size: 0.92em;
+}
+.slidev-layout ul > li > ul > li::before {
+  content: '·';
+  color: var(--faint);
+}
+
+.slidev-layout ol {
+  padding-left: 1.4rem;
+  margin-top: 0.9rem;
+}
+.slidev-layout ol > li {
+  margin-bottom: 0.5rem;
+}
+.slidev-layout ol > li::marker {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.85em;
+}
+
+/* ── code ─────────────────────────────────────────────────── */
+
+.slidev-layout :not(pre) > code {
+  font-family: var(--mono) !important;
+  font-size: 0.88em;
+  background: var(--bg-code) !important;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.08em 0.34em;
+  color: var(--accent) !important;
+}
+.slidev-layout :not(pre) > code::before,
+.slidev-layout :not(pre) > code::after {
+  content: none !important;
+}
+
+.slidev-layout pre {
+  background: var(--bg-code) !important;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem 1.15rem !important;
+  font-size: 1.12rem;
+  line-height: 1.55;
+  overflow: hidden;
+}
+.slidev-layout pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+.slidev-layout .shiki,
+.slidev-layout .shiki span {
+  background: transparent !important;
+}
+
+/* ── tables ───────────────────────────────────────────────── */
+
+.slidev-layout table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+  font-size: 1.06rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.slidev-layout thead th {
+  background: var(--bg-elev);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-weight: 500;
+  text-align: left;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.slidev-layout tbody td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid rgba(35, 42, 50, 0.6);
+  vertical-align: top;
+}
+.slidev-layout tbody tr:last-child td {
+  border-bottom: 0;
+}
+.slidev-layout tbody tr:nth-child(even) td {
+  background: rgba(20, 24, 29, 0.45);
+}
+.slidev-layout tbody td:first-child {
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ── quotes ───────────────────────────────────────────────── */
+
+.slidev-layout blockquote {
+  border: 0;
+  border-left: 2px solid var(--accent);
+  background: transparent;
+  padding: 0.1rem 0 0.1rem 1.3rem;
+  margin: 1.1rem 0;
+  font-family: var(--serif);
+  font-size: 1.95rem;
+  line-height: 1.32;
+  color: var(--text);
+  font-style: normal;
+  quotes: none;
+}
+.slidev-layout blockquote p {
+  margin: 0;
+}
+
+.pull {
+  font-family: var(--serif);
+  font-size: 3rem;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: #fff;
+  max-width: 22ch;
+}
+
+.cite {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+  margin-top: 1.1rem;
+  line-height: 1.6;
+}
+.cite a {
+  color: var(--faint);
+  border-bottom-color: var(--line);
+}
+
+/* ── utility blocks ───────────────────────────────────────── */
+
+.note {
+  font-size: 1.02rem;
+  color: var(--dim);
+  margin-top: 0.9rem;
+  line-height: 1.55;
+}
+
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1.05rem;
+}
+
+.callout {
+  border-left: 2px solid var(--warn);
+  background: rgba(255, 180, 84, 0.06);
+  padding: 0.75rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 1.06rem;
+  color: var(--text);
+  margin-top: 1rem;
+}
+.callout.danger {
+  border-left-color: var(--danger);
+  background: rgba(255, 107, 107, 0.07);
+}
+.callout.good {
+  border-left-color: var(--good);
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.kbd {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--accent);
+  background: rgba(106, 169, 255, 0.08);
+  border: 1px solid var(--accent-deep);
+  border-radius: 4px;
+  padding: 0.12em 0.45em;
+}
+
+.dim {
+  color: var(--dim);
+}
+.faint {
+  color: var(--faint);
+}
+.accent {
+  color: var(--accent);
+}
+.good {
+  color: var(--good);
+}
+.warn {
+  color: var(--warn);
+}
+.danger {
+  color: var(--danger);
+}
+.mono {
+  font-family: var(--mono);
+}
+.strike {
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+  color: var(--faint);
+}
+
+/* seven-ideals grid */
+.ideals {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1.6rem;
+  margin-top: 1.1rem;
+  font-size: 1.14rem;
+}
+.ideals > div {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  padding: 0.32rem 0;
+}
+.ideals .n {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  color: var(--faint);
+  min-width: 1.1rem;
+}
+.ideals .off {
+  color: var(--faint);
+}
+.ideals .on {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── step flow: chips + arrows, shared by the before/after slides ── */
+
+.flow {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+}
+
+/* the rail the dot runs along, from first chip centre to last */
+.flow::before {
+  content: '';
+  position: absolute;
+  top: 0.61rem;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line) 6%,
+    var(--line) 94%,
+    transparent
+  );
+}
+
+/* ── travelling glow dot ──────────────────────────────────────
+   The dot's TIMING is the argument: on the before slide it stalls
+   at each blocking step; on the after slide it never stops.       */
+
+.flow-dot {
+  position: absolute;
+  top: 0.25rem;
+  left: 10%;
+  width: 0.72rem;
+  height: 0.72rem;
+  margin-left: -0.36rem;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow:
+    0 0 0.5rem var(--danger),
+    0 0 1.4rem rgba(255, 107, 107, 0.65);
+  animation: dot-before 4.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.flow-dot.calm {
+  background: var(--good);
+  box-shadow:
+    0 0 0.5rem var(--good),
+    0 0 1.4rem rgba(74, 222, 128, 0.6);
+  animation: dot-after 1.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* stalls at fetch (30%), spinner (50%) and edit (90%) */
+@keyframes dot-before {
+  0%   { left: 10%; opacity: 0; }
+  4%   { left: 10%; opacity: 1; }
+  12%  { left: 30%; }
+  32%  { left: 30%; }
+  40%  { left: 50%; }
+  60%  { left: 50%; }
+  68%  { left: 70%; }
+  76%  { left: 90%; }
+  94%  { left: 90%; opacity: 1; }
+  100% { left: 90%; opacity: 0; }
+}
+
+/* never stops */
+@keyframes dot-after {
+  0%   { left: 10%; opacity: 0; }
+  6%   { left: 10%; opacity: 1; }
+  30%  { left: 30%; }
+  50%  { left: 50%; }
+  70%  { left: 70%; }
+  90%  { left: 90%; opacity: 1; }
+  100% { left: 90%; opacity: 0; }
+}
+
+/* ── wait chips strain while the dot is parked on them ──────
+   Windows are phase-locked to dot-before's 4.6s cycle:
+   fetch 12–32%, spinner 40–60%, edit 76–94%.                  */
+
+.chip.wait.w1 { animation: strain-1 4.6s ease-in-out infinite; }
+.chip.wait.w2 { animation: strain-2 4.6s ease-in-out infinite; }
+.chip.wait.w3 { animation: strain-3 4.6s ease-in-out infinite; }
+
+@keyframes strain-1 {
+  0%, 10%  { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+  15%, 30% { border-color: rgba(255,107,107,1);   background: rgba(255,107,107,0.2);  box-shadow: 0 0 1.5rem rgba(255,107,107,0.28); }
+  36%,100% { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+}
+@keyframes strain-2 {
+  0%, 38%  { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+  43%, 58% { border-color: rgba(255,107,107,1);   background: rgba(255,107,107,0.2);  box-shadow: 0 0 1.5rem rgba(255,107,107,0.28); }
+  64%,100% { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+}
+@keyframes strain-3 {
+  0%, 74%  { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+  79%, 92% { border-color: rgba(255,107,107,1);   background: rgba(255,107,107,0.2);  box-shadow: 0 0 1.5rem rgba(255,107,107,0.28); }
+  97%,100% { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-dot { animation: none; opacity: 1; }
+  .chip.wait.w1, .chip.wait.w2, .chip.wait.w3 { animation: none; }
+}
+
+.chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 8.4rem;
+  padding: 0.85rem 1rem 0.75rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-family: var(--mono);
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+/* a step that blocks on the network — this is where the spinner lives */
+.chip.wait {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--danger);
+}
+.chip .tag {
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.chip.wait .tag {
+  color: var(--danger);
+  opacity: 0.85;
+}
+.chip.instant {
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.07);
+  color: var(--good);
+}
+.chip.instant .tag {
+  color: var(--good);
+  opacity: 0.85;
+}
+.chip.gone {
+  border-style: dashed;
+  border-color: var(--line);
+  background: transparent;
+  color: var(--faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+}
+.chip.gone .tag {
+  text-decoration: none;
+}
+
+.flow .arrow {
+  display: flex;
+  align-items: center;
+  color: var(--faint);
+  font-size: 1.15rem;
+  padding-bottom: 0.9rem;
+}
+
+/* the return leg drawn underneath the chip row */
+.loopback {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 46rem;
+}
+.loopback svg {
+  width: 100%;
+  height: 3.4rem;
+  overflow: visible;
+}
+.loopback .path {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  opacity: 0.75;
+}
+.loopback .head {
+  fill: var(--danger);
+  opacity: 0.75;
+}
+.loopback.calm .path {
+  stroke: var(--good);
+  opacity: 0.6;
+}
+.loopback.calm .head {
+  fill: var(--good);
+  opacity: 0.6;
+}
+
+.loop-label {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: -0.4rem;
+}
+
+/* side-by-side code screenshots with their own captions (slide 4) */
+.shot-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-top: 1.5rem;
+}
+.shot-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+/* let the caption fill the remaining column height so both rules match */
+.shot-col .shot-cap {
+  flex: 1;
+}
+.shot-col img {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+}
+
+.shot-cap {
+  padding-left: 1rem;
+  border-left: 2px solid var(--line);
+}
+.shot-cap.bad {
+  border-left-color: var(--danger);
+}
+.shot-cap.good {
+  border-left-color: var(--good);
+}
+
+.shot-cap .cap-head {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.55rem;
+}
+.shot-cap.bad .cap-head {
+  color: var(--danger);
+}
+.shot-cap.good .cap-head {
+  color: var(--good);
+}
+
+.slidev-layout .shot-cap ul {
+  margin-top: 0;
+}
+.slidev-layout .shot-cap ul > li {
+  font-size: 1.06rem;
+  color: var(--text);
+  margin-bottom: 0.28rem;
+  padding-left: 1rem;
+}
+.slidev-layout .shot-cap ul > li::before {
+  content: '·';
+  font-size: 1.3em;
+  top: -0.12em;
+}
+.slidev-layout .shot-cap.bad ul > li::before {
+  color: var(--danger);
+}
+.slidev-layout .shot-cap.good ul > li::before {
+  color: var(--good);
+}
+
+.shot-cap .cap-note {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: #fff;
+  margin-top: 0.7rem;
+}
+
+/* ── slide 5: the two paths ────────────────────────────────── */
+
+/* the analogy as a structural mapping: React did it for UI, sync does it for data */
+.shift {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: baseline;
+  column-gap: 1.1rem;
+  row-gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+.shift .dom {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: right;
+  padding-top: 0.18rem;
+}
+.shift .was {
+  font-size: 1.14rem;
+  color: var(--faint);
+  text-decoration: line-through;
+  text-decoration-color: rgba(107, 116, 127, 0.5);
+}
+.shift .arr {
+  color: var(--faint);
+  font-size: 1rem;
+}
+.shift .now {
+  font-size: 1.14rem;
+  color: var(--dim);
+}
+.shift .now.here {
+  color: #fff;
+  font-weight: 600;
+}
+.shift .now.here::after {
+  content: '← this talk';
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-left: 0.9rem;
+  font-weight: 400;
+}
+
+.paths {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  margin-top: 2rem;
+}
+
+.path {
+  border-left: 2px solid var(--line);
+  padding-left: 1.15rem;
+}
+.path.read {
+  border-left-color: var(--good);
+}
+.path.write {
+  border-left-color: var(--accent);
+}
+
+.path-label {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.path.read .path-label {
+  color: var(--good);
+}
+.path.write .path-label {
+  color: var(--accent);
+}
+.path-label .qual {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--dim);
+}
+
+.track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  padding-top: 1.35rem;
+}
+
+/* ── travelling dots ────────────────────────────────────────
+   Stops are the measured node centres, so each dot lands on a
+   node rather than near it. The WRITE dot's timing encodes
+   "optimistic": instant to the local replica, then a slow trip
+   to the server, then the confirmation lights up.            */
+
+.pdot {
+  position: absolute;
+  top: 0.2rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-left: -0.3rem;
+  border-radius: 50%;
+}
+
+.pdot.read-dot {
+  left: 5.5%;
+  background: var(--good);
+  box-shadow: 0 0 0.45rem var(--good), 0 0 1.2rem rgba(74, 222, 128, 0.55);
+  animation: read-run 3s linear infinite;
+}
+.pdot.write-dot {
+  left: 2.5%;
+  background: var(--accent);
+  box-shadow: 0 0 0.45rem var(--accent), 0 0 1.2rem rgba(106, 169, 255, 0.55);
+  animation: write-run 4.4s ease-in-out infinite;
+}
+
+/* steady stream: database → sync engine → replica → live query → UI */
+@keyframes read-run {
+  0%   { left: 5.5%;  opacity: 0; }
+  6%   { opacity: 1; }
+  25%  { left: 21.3%; }
+  50%  { left: 39.6%; }
+  75%  { left: 57.3%; }
+  94%  { left: 69.6%; opacity: 1; }
+  100% { left: 69.6%; opacity: 0; }
+}
+
+/* optimistic: snaps to the replica, then crawls to the server */
+@keyframes write-run {
+  0%   { left: 2.5%;  opacity: 0; }
+  3%   { opacity: 1; }
+  8%   { left: 16.3%; }
+  26%  { left: 16.3%; }
+  48%  { left: 35%; }
+  72%  { left: 51.3%; }
+  88%  { left: 76.7%; opacity: 1; }
+  100% { left: 76.7%; opacity: 0; }
+}
+
+/* the confirmation node lights up as the write dot reaches it */
+.track .node.ghost {
+  animation: confirm-pulse 4.4s ease-in-out infinite;
+}
+@keyframes confirm-pulse {
+  0%, 76%   { border-color: rgba(74,222,128,0.35); color: var(--dim); box-shadow: none; }
+  84%, 94%  { border-color: rgba(74,222,128,0.9);  color: var(--good); box-shadow: 0 0 1.3rem rgba(74,222,128,0.22); }
+  100%      { border-color: rgba(74,222,128,0.35); color: var(--dim); box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdot { animation: none; opacity: 1; }
+  .track .node.ghost { animation: none; }
+}
+.track .node {
+  font-family: var(--mono);
+  font-size: 1.02rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg-elev);
+  color: var(--text);
+  white-space: nowrap;
+}
+.track .node.ui {
+  border-color: var(--accent-deep);
+  color: #fff;
+}
+.track .ar {
+  color: var(--faint);
+  font-size: 1.05rem;
+  flex: none;
+}
+.track .ar.ret {
+  color: var(--good);
+  opacity: 0.8;
+  font-size: 1.25rem;
+}
+.track .node.ghost {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(74, 222, 128, 0.35);
+  color: var(--dim);
+  font-size: 0.92rem;
+}
+.path.read .track .ar {
+  color: var(--good);
+  opacity: 0.7;
+}
+.path.write .track .ar {
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* ── slide 6: the paper, as sheets on a desk ───────────────── */
+
+.paper-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  align-items: center;
+  margin-top: 0.6rem;
+}
+
+.paper-stack {
+  position: relative;
+  perspective: 1900px;
+  perspective-origin: 45% 42%;
+  height: 30rem;
+}
+
+.sheet {
+  background: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow:
+    0 0.1rem 0.3rem rgba(0, 0, 0, 0.5),
+    0 0.9rem 1.6rem rgba(0, 0, 0, 0.45),
+    0 2.4rem 4.5rem rgba(0, 0, 0, 0.5);
+}
+.sheet img {
+  width: 100%;
+  display: block;
+}
+
+/* the full title page, portrait, sized to the available height */
+.sheet.title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: auto;
+  transform: rotateY(9deg) rotateX(2.5deg) rotateZ(-1.6deg);
+}
+.sheet.title img {
+  height: 100%;
+  width: auto;
+}
+
+/* the quoted passage, hanging off the lower right into the column gap */
+.sheet.quote {
+  position: absolute;
+  right: -3%;
+  bottom: 0.8rem;
+  width: 72%;
+  padding: 0.5rem 0.65rem;
+  transform: rotateY(-8deg) rotateZ(2.2deg) translateZ(90px);
+}
+
+.paper-stack::after {
+  content: '';
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  bottom: -0.5rem;
+  height: 1.5rem;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.6),
+    transparent 70%
+  );
+  filter: blur(7px);
+  z-index: -1;
+}
+
+.paper-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 2.2rem;
+}
+
+.provenance {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.slidev-layout .prov-list > li {
+  font-size: 1.06rem;
+  color: var(--dim);
+  margin-bottom: 0.4rem;
+}
+.slidev-layout .prov-list > li strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* the cloud-vs-local-first role swap */
+.swap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1.2rem;
+  row-gap: 0.65rem;
+  margin-top: 1.1rem;
+  align-items: baseline;
+}
+.swap .who {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--good);
+  white-space: nowrap;
+}
+.swap .who.dim {
+  color: var(--faint);
+}
+.swap .what {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.swap .what.dim {
+  color: var(--faint);
+}
+.swap .what strong {
+  color: #fff;
+  font-weight: 600;
+}
+.swap .what.dim strong {
+  color: var(--dim);
+}
+
+/* the consequence of the swap, set apart by a rule */
+.consequence {
+  margin-top: 1.7rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ── slide 7: the seven ideals as chips ────────────────────── */
+
+.subline {
+  font-size: 1.16rem;
+  color: var(--dim);
+  margin-top: 0.6rem;
+}
+
+.ideal-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.4rem;
+  margin-top: 2rem;
+  align-items: start;
+}
+
+.ig-head {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.ig-head.feel {
+  color: var(--good);
+}
+.ig-head.own {
+  color: var(--danger);
+}
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.ichip {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.72rem 1rem 0.72rem 0.8rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  border-radius: 9px;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--text);
+}
+.chips.feel .ichip {
+  border-left-color: rgba(74, 222, 128, 0.55);
+}
+.chips.own .ichip {
+  border-left-color: rgba(255, 107, 107, 0.5);
+}
+
+.ichip .num {
+  flex: none;
+  width: 1.65rem;
+  height: 1.65rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+.chips.feel .ichip .num {
+  color: var(--good);
+  border-color: rgba(74, 222, 128, 0.45);
+}
+.chips.own .ichip .num {
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+
+/* used by S8 to retire an ideal or single one out */
+.ichip.dropped {
+  color: var(--faint);
+  background: transparent;
+  border-color: var(--line);
+  border-left-color: var(--line);
+  text-decoration: line-through;
+  text-decoration-color: rgba(107, 116, 127, 0.5);
+}
+.ichip.dropped .num {
+  color: var(--faint);
+  border-color: var(--line);
+  text-decoration: none;
+}
+/* ── S8: the six ideals retire on a timer ───────────────────
+   Slidev sets inactive slides to display:none, so these
+   animations only begin when the slide is actually shown.     */
+
+.ichip.auto-drop {
+  animation: chip-drop 0.5s ease forwards;
+}
+.ichip.auto-drop .num {
+  animation: num-drop 0.5s ease forwards;
+  animation-delay: inherit;
+}
+.ichip.auto-drop.d1, .ichip.auto-drop.d1 .num { animation-delay: 0.9s; }
+.ichip.auto-drop.d2, .ichip.auto-drop.d2 .num { animation-delay: 1.5s; }
+.ichip.auto-drop.d3, .ichip.auto-drop.d3 .num { animation-delay: 2.1s; }
+.ichip.auto-drop.d4, .ichip.auto-drop.d4 .num { animation-delay: 2.7s; }
+.ichip.auto-drop.d5, .ichip.auto-drop.d5 .num { animation-delay: 3.4s; }
+.ichip.auto-drop.d6, .ichip.auto-drop.d6 .num { animation-delay: 4.0s; }
+
+@keyframes chip-drop {
+  to {
+    color: var(--faint);
+    background: transparent;
+    border-color: var(--line);
+    border-left-color: var(--line);
+    text-decoration: line-through;
+    text-decoration-color: rgba(107, 116, 127, 0.5);
+  }
+}
+@keyframes num-drop {
+  to {
+    color: var(--faint);
+    border-color: var(--line);
+  }
+}
+
+/* the survivor lights up once the rest are gone */
+.ichip.auto-keep {
+  animation: chip-keep 0.55s ease forwards;
+  animation-delay: 4.7s;
+}
+@keyframes chip-keep {
+  to {
+    color: #fff;
+    font-weight: 600;
+    background: rgba(74, 222, 128, 0.09);
+    border-color: rgba(74, 222, 128, 0.55);
+    border-left-color: var(--good);
+  }
+}
+
+/* the verdict: our app, placed on the same table as slide 6 */
+.verdict {
+  margin-top: 1.6rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--line);
+}
+.swap .who.ours {
+  color: var(--danger);
+}
+
+/* and the verdict follows */
+.auto-reveal {
+  opacity: 0;
+  animation: fade-in 0.6s ease forwards;
+  animation-delay: 5.4s;
+}
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ichip.auto-drop, .ichip.auto-drop .num,
+  .ichip.auto-keep, .auto-reveal {
+    animation-duration: 0.01s;
+    animation-delay: 0s;
+  }
+}
+
+.ichip.kept {
+  color: #fff;
+  font-weight: 600;
+  background: rgba(74, 222, 128, 0.09);
+  border-color: rgba(74, 222, 128, 0.55);
+  border-left-color: var(--good);
+}
+
+/* big centred demo marker */
+.demo-marker {
+  font-family: var(--mono);
+  font-size: 6rem;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── title slide ──────────────────────────────────────────── */
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  /* nudge the cluster down so it reads optically centred */
+  padding-top: 3.2rem;
+}
+
+.slidev-layout .title-wrap h1 {
+  font-size: 8.6rem !important;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  margin-bottom: 0;
+  text-align: center;
+}
+.slidev-layout .title-wrap h1 .kill {
+  color: var(--danger);
+}
+/* red for the thing we are killing — reused in headings */
+.slidev-layout h2 .kill,
+.slidev-layout h1 .kill,
+.slidev-layout .pull .kill,
+.slidev-layout .subline .kill {
+  color: var(--danger);
+}
+/* accent for the phrase that carries the point */
+.slidev-layout h2 .hl,
+.slidev-layout h1 .hl,
+.slidev-layout .pull .hl,
+.slidev-layout .subline .hl {
+  color: var(--accent);
+}
+/* green for what we delivered, red for what we didn't */
+.slidev-layout h2 .hl-good,
+.slidev-layout h1 .hl-good,
+.slidev-layout .pull .hl-good,
+.slidev-layout .subline .hl-good {
+  color: var(--good);
+}
+
+/* ── animated struck-through spinner mark ─────────────────── */
+
+.title-mark {
+  width: 9.5rem;
+  height: 9.5rem;
+  flex: none;
+  margin-top: 3.2rem;
+}
+.title-mark svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.title-mark .ring-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 9;
+}
+.title-mark .ring-arc {
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+.title-mark .spin {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  animation: mark-spin 1s linear infinite;
+}
+.title-mark .ring-kill {
+  stroke: var(--danger);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  animation: mark-kill 3.6s ease-in-out infinite;
+}
+/* second stroke completes the cross, staggered just behind the first */
+.title-mark .ring-kill.alt {
+  animation-delay: 0.32s;
+}
+
+@keyframes mark-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* draw the strike, hold it, release, repeat */
+@keyframes mark-kill {
+  0%   { stroke-dashoffset: 100; opacity: 0; }
+  8%   { opacity: 1; }
+  26%  { stroke-dashoffset: 0;   opacity: 1; }
+  78%  { stroke-dashoffset: 0;   opacity: 1; }
+  92%  { stroke-dashoffset: 0;   opacity: 0; }
+  100% { stroke-dashoffset: 100; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-mark .spin { animation: none; }
+  .title-mark .ring-kill { animation: none; stroke-dashoffset: 0; }
+}
+
+/* two-column helper */
+.cols2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  margin-top: 1rem;
+}
+
+/* footer slide number */
+.slidev-page {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--faint);
+}
+
+/* ── slide 9: the three slots ───────────────────────────────── */
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.9rem;
+  align-items: stretch;
+}
+
+.slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem 1.25rem 1.1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-top-width: 2px;
+  border-radius: 11px;
+}
+.slot.read {
+  border-top-color: rgba(74, 222, 128, 0.55);
+}
+.slot.write {
+  border-top-color: rgba(106, 169, 255, 0.6);
+}
+/* the slot you don't have to fill reads as settled, not as an option */
+.slot.keep {
+  background: linear-gradient(
+    180deg,
+    rgba(106, 169, 255, 0.07),
+    rgba(106, 169, 255, 0) 60%
+  ),
+  var(--bg-elev);
+}
+
+.slot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.slot-n {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.slot-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.16rem 0.5rem;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.slot-tag.read {
+  color: var(--good);
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+.slot-tag.write {
+  color: var(--accent);
+  background: rgba(106, 169, 255, 0.11);
+  border: 1px solid rgba(106, 169, 255, 0.4);
+}
+
+.slot-name {
+  font-family: var(--serif);
+  font-size: 1.85rem;
+  line-height: 1.1;
+  color: #fff;
+  margin-bottom: 0.55rem;
+}
+
+.slot-job {
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--dim);
+  /* push the metadata rows to the bottom so all three cards align */
+  flex: 1;
+}
+
+.slot-where {
+  font-size: 0.98rem;
+  color: var(--text);
+  margin-top: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+}
+.slot-where .k {
+  display: inline-block;
+  min-width: 4.6rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+/* sits top-LEFT: top-right would stack a second blue chip on the path tag */
+.slot-badge {
+  position: absolute;
+  top: -0.72rem;
+  left: 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--bg);
+  border: 1px solid rgba(106, 169, 255, 0.45);
+}
+
+/* ── slide 10: how we filled the slots ──────────────────────── */
+
+.fills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  /* held short so the slack falls outside the cards, not inside them */
+  max-width: 43rem;
+}
+
+.fill {
+  display: grid;
+  grid-template-columns: 5.2rem 15rem 1.6rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  border-left-color: rgba(74, 222, 128, 0.55);
+  border-radius: 9px;
+}
+/* the slot we didn't choose reads blue, matching its write-path tag on S9 */
+.fill.keep {
+  border-left-color: rgba(106, 169, 255, 0.6);
+}
+
+.fill .fn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.fill .fr {
+  font-size: 1.06rem;
+  color: var(--dim);
+}
+.fill .fa {
+  color: var(--faint);
+  text-align: center;
+}
+.fill .fv {
+  font-size: 1.32rem;
+  font-weight: 600;
+  color: #fff;
+}
+.fill.keep .fv {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.alts {
+  margin-top: 1.9rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--line);
+}
+.alts-head {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.85rem;
+}
+.alt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+/* names only, no characterisations — see the slide notes */
+.alt {
+  font-size: 1.02rem;
+  color: var(--dim);
+  padding: 0.34rem 0.8rem;
+  background: rgba(20, 24, 29, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+/* ── slide 10: act-5 opener, the four walls previewed ────────── */
+
+.walls-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem 1.6rem;
+  margin-top: 1.9rem;
+}
+
+.wp {
+  display: grid;
+  /* fixed numeral column so the four titles align across the grid */
+  grid-template-columns: 1.7rem 1fr;
+  align-items: start;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  border-left-color: rgba(255, 107, 107, 0.5);
+  border-radius: 9px;
+}
+
+.wp-n {
+  font-family: var(--serif);
+  font-size: 2.3rem;
+  line-height: 0.95;
+  color: var(--danger);
+  opacity: 0.85;
+  text-align: center;
+}
+.wp-t {
+  font-size: 1.24rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+.wp-d {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--dim);
+  margin-top: 0.2rem;
+}
+
+/* ── slides parked past the end of the main flow ─────────────── */
+
+.backup-tag {
+  display: inline-block;
+  /* .slidev-layout.default is a column flexbox, which would stretch this
+     full-width without an explicit align-self */
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--warn);
+  padding: 0.24rem 0.65rem;
+  border: 1px dashed rgba(255, 180, 84, 0.5);
+  border-radius: 5px;
+  margin-bottom: 1.1rem;
+}
+
+/* ── slide 11: wall 1, code shot beside the consequence ─────── */
+
+.wall-split {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 1.8rem;
+  margin-top: 1.4rem;
+  align-items: start;
+}
+.wall-shot img {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+}
+.wall-side .callout {
+  margin-top: 0;
+}
+
+/* ── slide 11: blast-radius escalation, replacing the red callout ─── */
+
+.blast-head {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.7rem;
+}
+
+.blast {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+/* two rows, same shape: the escalation is carried by weight and colour,
+   not by shouting the whole sentence in red */
+.br {
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-left-width: 2px;
+  border-left-color: var(--line);
+  border-radius: 8px;
+}
+.br.bad {
+  border-left-color: var(--danger);
+  background: rgba(255, 107, 107, 0.07);
+}
+.br .bw {
+  font-size: 0.95rem;
+  color: var(--dim);
+  margin-bottom: 0.2rem;
+}
+.br .bw strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.br .bc {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  line-height: 1.15;
+  color: var(--dim);
+}
+.br .bc em {
+  font-style: normal;
+  color: #fff;
+}
+.br.bad .bc {
+  font-size: 1.95rem;
+  color: var(--text);
+}
+.br.bad .bc em {
+  color: var(--danger);
+}
+
+.guards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.guards {
+  gap: 0.85rem;
+}
+.guards .g {
+  font-size: 1.06rem;
+  line-height: 1.4;
+  color: var(--dim);
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--line);
+}
+.guards .g strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* caption under a wall's code shot (or standing in for one on wall 4) */
+.shot-under {
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--dim);
+  margin-top: 0.9rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--line);
+}
+.shot-under strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── slide 15: the offline beat, reusing the slide 2/3 chip flow ───
+   Same device a third time: the dot starts green, gets as far as
+   "appears", then turns red and dies. The timing IS the argument. */
+
+.chip.fail {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--danger);
+}
+.chip.fail .tag {
+  color: var(--danger);
+  opacity: 0.85;
+}
+
+.flow-dot.doomed {
+  background: var(--good);
+  box-shadow:
+    0 0 0.5rem var(--good),
+    0 0 1.4rem rgba(74, 222, 128, 0.6);
+  animation: dot-doomed 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* green while the optimistic write holds, red once it can't be confirmed */
+@keyframes dot-doomed {
+  0% {
+    left: 10%;
+    opacity: 0;
+    background: var(--good);
+    box-shadow: 0 0 0.5rem var(--good), 0 0 1.4rem rgba(74, 222, 128, 0.6);
+  }
+  5%  { left: 10%; opacity: 1; }
+  22% { left: 30%; }
+  40% { left: 50%; }
+  52% {
+    left: 50%;
+    background: var(--good);
+    box-shadow: 0 0 0.5rem var(--good), 0 0 1.4rem rgba(74, 222, 128, 0.6);
+  }
+  60% {
+    left: 70%;
+    background: var(--danger);
+    box-shadow: 0 0 0.5rem var(--danger), 0 0 1.4rem rgba(255, 107, 107, 0.65);
+  }
+  74% { left: 70%; }
+  86% { left: 90%; opacity: 1; }
+  96% { left: 90%; opacity: 0.15; }
+  100% {
+    left: 90%;
+    opacity: 0;
+    background: var(--danger);
+    box-shadow: 0 0 0.5rem var(--danger), 0 0 1.4rem rgba(255, 107, 107, 0.65);
+  }
+}
+
+/* phase-locked to dot-doomed: vanishes 60-74%, reload 86-96% */
+.chip.fail.f1 { animation: strain-f1 4.4s ease-in-out infinite; }
+.chip.fail.f2 { animation: strain-f2 4.4s ease-in-out infinite; }
+
+@keyframes strain-f1 {
+  0%, 56%   { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+  62%, 74%  { border-color: rgba(255,107,107,1);   background: rgba(255,107,107,0.2);  box-shadow: 0 0 1.5rem rgba(255,107,107,0.28); }
+  80%, 100% { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+}
+@keyframes strain-f2 {
+  0%, 84%   { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+  88%, 96%  { border-color: rgba(255,107,107,1);   background: rgba(255,107,107,0.2);  box-shadow: 0 0 1.5rem rgba(255,107,107,0.28); }
+  100%      { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.08); box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-dot.doomed,
+  .chip.fail.f1,
+  .chip.fail.f2 {
+    animation: none;
+  }
+}
+
+/* ── slide 16: the pivot as evidence ─────────────────────────────
+   Same two-column shape as the walls, but the left column carries
+   primary-source quotes instead of a code shot. */
+
+.evidence-split {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.9rem;
+  margin-top: 1.5rem;
+  align-items: start;
+}
+
+.qstack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.qstack .q {
+  font-family: var(--serif);
+  font-size: 1.28rem;
+  line-height: 1.3;
+  color: var(--dim);
+  padding-left: 1rem;
+  border-left: 1px solid var(--line);
+}
+.qstack .q strong {
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* the reclassification itself gets the size and the accent rule */
+.qstack .q.lead {
+  font-size: 2.05rem;
+  line-height: 1.2;
+  color: var(--text);
+  border-left: 2px solid var(--danger);
+  padding-bottom: 0.2rem;
+}
+.qstack .q.lead strong {
+  color: #fff;
+}
+
+.qstack .qnote {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  color: var(--faint);
+}
+
+/* a per-line source tag, for when one column mixes two primary sources */
+.guards .g .gsrc {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+
+/* ── slide 17: the paper's own findings, as paper ────────────────
+   Uniform one-column strips (same geometry as the slide 6 crops) so
+   the type size matches across all three. */
+
+.findings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+
+.fnd {
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--line);
+}
+.fnd.good {
+  border-left-color: rgba(74, 222, 128, 0.6);
+}
+.fnd.bad {
+  border-left-color: rgba(255, 107, 107, 0.55);
+}
+
+.fnd-tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0.42rem;
+}
+.fnd.good .fnd-tag {
+  color: var(--good);
+}
+.fnd.bad .fnd-tag {
+  color: var(--danger);
+}
+
+.fnd img {
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+}
+
+/* ── slide 17: three whole pages, each with its finding lit ──────
+   Full slide width so the pages are as large as they can be; the
+   readable version of each quote sits directly beneath its page. */
+
+.pages3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.3rem;
+  align-items: start;
+}
+
+.pg {
+  display: flex;
+  flex-direction: column;
+}
+
+.pg-tag {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.pg.good .pg-tag { color: var(--good); }
+.pg.bad .pg-tag { color: var(--danger); }
+
+.pg {
+  align-items: center;
+}
+.pg .pg-tag,
+.pg .pg-quote {
+  align-self: stretch;
+}
+.pg img {
+  display: block;
+  /* height-capped, not width-driven: a full A4 page at column width is taller
+     than the slide */
+  max-height: 20rem;
+  max-width: 100%;
+  width: auto;
+  border-radius: 3px;
+  /* lift the sheet off the dark background */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 26px rgba(0, 0, 0, 0.55);
+}
+.pg.good img { outline: 1px solid rgba(74, 222, 128, 0.35); }
+.pg.bad img { outline: 1px solid rgba(255, 107, 107, 0.32); }
+
+.pg-quote {
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  line-height: 1.25;
+  color: var(--dim);
+  margin-top: 0.75rem;
+}
+.pg-quote strong {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.pages3-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ── slide 18: the decision rule as three costed options ─────────
+   Ordered cheapest-commitment first, so the row the audience is
+   already on is the one they read first. */
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.4rem;
+  margin-top: 1.7rem;
+  align-items: stretch;
+}
+
+.ch {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.15rem 0.95rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-top-width: 2px;
+  border-radius: 10px;
+}
+.ch.keep-fetch { border-top-color: rgba(255, 180, 84, 0.6); }
+.ch.spinner    { border-top-color: rgba(74, 222, 128, 0.6); }
+.ch.crdt       { border-top-color: rgba(106, 169, 255, 0.6); }
+
+.ch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.ch-n {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.ch-tag {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.ch-tag.warn   { color: var(--warn);   background: rgba(255,180,84,.1);  border: 1px solid rgba(255,180,84,.4); }
+.ch-tag.good   { color: var(--good);   background: rgba(74,222,128,.1);  border: 1px solid rgba(74,222,128,.4); }
+.ch-tag.accent { color: var(--accent); background: rgba(106,169,255,.11); border: 1px solid rgba(106,169,255,.42); }
+
+.slidev-layout .choices ul {
+  margin: 0;
+  flex: 1;
+}
+.slidev-layout .choices ul > li {
+  font-size: 0.97rem;
+  line-height: 1.35;
+  color: var(--dim);
+  margin-bottom: 0.5rem;
+  padding-left: 0.9rem;
+}
+.slidev-layout .choices ul > li::before {
+  content: '·';
+  color: var(--faint);
+  top: -0.05em;
+}
+.slidev-layout .choices ul > li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ch-pay {
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.97rem;
+  color: var(--text);
+  /* reserve two lines in every card so the three rules land on one baseline */
+  min-height: 4.35rem;
+}
+.ch-pay .k {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.25rem;
+}

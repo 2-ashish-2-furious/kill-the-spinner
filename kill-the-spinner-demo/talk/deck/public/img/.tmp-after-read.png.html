@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  
+@font-face{font-family:'JetBrains Mono';src:url('file:///Volumes/workplace/my-electric-app/talk/deck/public/fonts/jetbrains-mono-normal.woff2') format('woff2');font-weight:400 700;font-display:block}
+@font-face{font-family:'Inter';src:url('file:///Volumes/workplace/my-electric-app/talk/deck/public/fonts/inter-normal.woff2') format('woff2');font-weight:400 700;font-display:block}
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:transparent;font-family:'JetBrains Mono',monospace}
+  .panel{
+    width:820px;background:#10141a;border:1px solid #232a32;border-radius:14px;
+    overflow:hidden;
+  }
+  .bar{
+    display:flex;align-items:center;justify-content:flex-start;gap:1rem;
+    padding:14px 20px;background:#14181d;border-bottom:1px solid #232a32;
+  }
+  .path{font-size:14px;color:#9ba3ae;letter-spacing:0.01em}
+  .path b{color:#e8eaed;font-weight:500}
+  .badge{
+    font-size:15px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+    padding:5px 12px;border-radius:6px;white-space:nowrap;
+  }
+  .badge.bad{color:#ff6b6b;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.45)}
+  .badge.good{color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.4)}
+  .badge.warn{color:#ffb454;background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.42)}
+  pre{padding:16px 0 18px;font-size:19px;line-height:1.7;background:transparent!important}
+  pre code{background:transparent!important}
+  .row{display:flex;align-items:flex-start;padding:0 20px;position:relative}
+  .row.cold{opacity:.42}
+  .row.hot{background:rgba(232,234,237,.035)}
+  .ln{
+    flex:none;width:46px;text-align:right;padding-right:18px;
+    color:#6b747f;font-size:15px;user-select:none;
+  }
+  .row.hot .ln{color:#e8eaed}
+  .code{white-space:pre;flex:1}
+  .row.has-mark .code{padding-right:150px}
+  .mark{
+    position:absolute;right:18px;top:2px;font-size:15px;font-weight:700;
+    letter-spacing:.09em;text-transform:uppercase;padding:2px 9px;border-radius:5px;
+  }
+  .mark.bad{color:#ff6b6b;background:rgba(255,107,107,.14);border:1px solid rgba(255,107,107,.5)}
+  .mark.good{color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.45)}
+  .mark.warn{color:#ffb454;background:rgba(255,180,84,.12);border:1px solid rgba(255,180,84,.48)}
+  </style></head><body>
+  <div class="panel">
+    <div class="bar">
+      <div class="badge good">no loading state</div>
+    </div>
+    <pre class="shiki vitesse-dark" style="background-color:#121212;color:#dbd7caee" tabindex="0"><code><span class="row hot has-mark"><span class="ln">95</span><span class="code"><span style="color:#DBD7CAEE">  } </span><span style="color:#666666">=</span><span style="color:#80A665"> useLiveInfiniteQuery</span><span style="color:#666666">(</span></span><span class="mark good">live query</span></span><span class="row cold"><span class="ln">96</span><span class="code"><span style="color:#666666">    (</span><span style="color:#BD976A">q</span><span style="color:#666666">)</span><span style="color:#666666"> =></span></span></span><span class="row cold"><span class="ln">97</span><span class="code"><span style="color:#BD976A">      q</span></span></span><span class="row hot"><span class="ln">98</span><span class="code"><span style="color:#666666">        .</span><span style="color:#80A665">from</span><span style="color:#666666">({</span><span style="color:#B8A965"> issues</span><span style="color:#666666">:</span><span style="color:#BD976A"> demoIssuesCollection</span><span style="color:#666666"> })</span></span></span><span class="row cold ellip"><span class="ln"></span><span class="code">⋯</span></span><span class="row cold"><span class="ln">109</span><span class="code"><span style="color:#666666">        .</span><span style="color:#80A665">orderBy</span><span style="color:#666666">(({</span><span style="color:#BD976A"> issues</span><span style="color:#666666">:</span><span style="color:#BD976A"> row</span><span style="color:#666666"> })</span><span style="color:#666666"> =></span><span style="color:#BD976A"> row</span><span style="color:#666666">.</span><span style="color:#BD976A">id</span><span style="color:#666666">,</span><span style="color:#C98A7D77"> `</span><span style="color:#C98A7D">desc</span><span style="color:#C98A7D77">`</span><span style="color:#666666">),</span></span></span></code></pre>
+  </div>
+  </body></html>

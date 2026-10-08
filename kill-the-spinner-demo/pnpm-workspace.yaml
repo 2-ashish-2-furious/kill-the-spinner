@@ -1,0 +1,4 @@
+allowBuilds:
+  '@journeyapps/wa-sqlite': true
+  aws-sdk: false
+  esbuild: false

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local-First: Kill the Spinner</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+
+<style>
+  :root {
+    --ink: #f4f7fa;
+    --bg: #08090c;
+    --dim: #7c8794;
+    --accent: #6fd3ff;
+    --warn: #ffc857;
+    --bad: #ff6b6b;
+    --good: #8ce99a;
+    --r-main-font-size: 40px;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal { font-size: 40px; color: var(--ink);
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+  .reveal h1 { font-size: 2.1em; line-height: 1.05; letter-spacing: -0.02em; }
+  .reveal h2 { font-size: 1.55em; line-height: 1.1;  letter-spacing: -0.01em; }
+  .reveal h3 { font-size: 1.15em; line-height: 1.2; }
+  .reveal h1, .reveal h2, .reveal h3 { text-transform: none; color: var(--ink); text-shadow: none; }
+
+  .reveal section { text-align: left; }
+  .reveal .center { text-align: center; }
+  /* denser slides get a local scale so nothing ever clips */
+  .reveal section.dense { font-size: 0.88em; }
+
+  /* Act / slide label */
+  .label {
+    position: absolute; top: -1.15em; left: 0;
+    font-size: 0.58em; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .label .sid { color: var(--accent); }
+
+  /* Keystone bullets */
+  .reveal ul.keys { list-style: none; margin: 0.6em 0 0 0; padding: 0; width: 100%; box-sizing: border-box; }
+  .reveal ul.keys li {
+    margin: 0.42em 0; padding-left: 1.5em; position: relative;
+    font-size: 1.05em; line-height: 1.25;
+  }
+  .reveal ul.keys li::before {
+    content: "—"; position: absolute; left: 0; color: var(--accent);
+  }
+  .reveal ul.keys li strong { color: var(--warn); }
+
+  /* Tables */
+  .reveal table { width: 100%; border-collapse: collapse; margin-top: 0.5em; font-size: 0.88em; }
+  .reveal table th {
+    text-align: left; font-size: 0.78em; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); border-bottom: 2px solid #2c333d; padding: 0.35em 0.5em; font-weight: 600;
+  }
+  .reveal table td {
+    padding: 0.38em 0.5em; border-bottom: 1px solid #1b2029; vertical-align: top; line-height: 1.2;
+  }
+  .reveal table.tight td, .reveal table.tight th { padding: 0.26em 0.5em; }
+  .reveal table td.k { color: var(--warn); font-weight: 600; white-space: nowrap; }
+  .reveal table tr.dim td { color: #5c6672; }
+  .reveal table tr.hl td { color: var(--ink); background: rgba(111,211,255,0.13); font-weight: 600; }
+  .reveal table td code, .reveal code.inl {
+    font-family: "SF Mono", Menlo, Consolas, monospace; color: var(--good);
+    font-size: 0.95em; background: rgba(140,233,154,0.08); padding: 0 0.2em; border-radius: 3px;
+  }
+
+  /* Code / schematic blocks (no highlighter — hand-styled for projection) */
+  pre.plain {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.86em; line-height: 1.45;
+    background: #10141b; border: 1px solid #232a34; border-radius: 8px;
+    padding: 0.8em 1em; margin: 0.5em 0; white-space: pre; overflow: visible;
+    box-shadow: none; color: #dfe6ee;
+  }
+  pre.plain .c  { color: var(--dim); }
+  pre.plain .a  { color: var(--accent); }
+  pre.plain .g  { color: var(--good); }
+  pre.plain .r  { color: var(--bad); font-weight: 700; }
+  pre.plain .w  { color: var(--warn); }
+  pre.plain .strike { color: #5c6672; text-decoration: line-through; }
+
+  /* Diagram */
+  .flow {
+    display: flex; align-items: stretch; gap: 0.5em; margin: 0.5em 0 0.2em 0; flex-wrap: nowrap;
+  }
+  .flow .box {
+    flex: 1; text-align: center; padding: 0.55em 0.3em; border: 2px solid #2c333d;
+    border-radius: 8px; font-size: 0.72em; line-height: 1.15; background: #10141b;
+  }
+  .flow .arw { align-self: center; color: var(--accent); font-size: 1.1em; }
+  .backflow {
+    margin-top: 0.35em; padding: 0.45em 0.7em; border: 2px dashed #4a5462; border-radius: 8px;
+    font-size: 0.72em; color: var(--warn); text-align: center;
+  }
+
+  /* Quotes */
+  blockquote.big {
+    width: 100%; box-sizing: border-box; margin: 0.4em 0; padding: 0 0 0 0.8em;
+    border-left: 6px solid var(--accent); background: none; box-shadow: none;
+    font-style: normal; font-size: 1.25em; line-height: 1.22; font-weight: 600;
+  }
+  blockquote.mid {
+    width: 100%; box-sizing: border-box; margin: 0.35em 0; padding: 0 0 0 0.7em;
+    border-left: 4px solid #3a434f; background: none; box-shadow: none;
+    font-style: normal; font-size: 0.92em; line-height: 1.25; color: #cfd8e2;
+  }
+  .attrib {
+    font-size: 0.7em; color: var(--dim); line-height: 1.3; margin-top: 0.4em;
+  }
+  .attrib .u { color: #8f9aa7; }
+
+  .callout {
+    border: 2px solid var(--warn); border-radius: 8px; padding: 0.55em 0.8em;
+    margin-top: 0.5em; font-size: 0.88em; line-height: 1.25;
+  }
+  .callout .t { color: var(--warn); font-weight: 700; }
+
+  .demo { font-size: 5.2em; letter-spacing: 0.1em; font-weight: 800; line-height: 1; }
+  .demo-sub { font-size: 0.85em; color: var(--dim); margin-top: 0.6em; letter-spacing: 0.02em; }
+
+  /* Timeline */
+  .tl { display: flex; gap: 0.35em; align-items: stretch; font-size: 0.6em; margin: 0.5em 0 0.5em 0; }
+  .tl div {
+    flex: 1; text-align: center; padding: 0.4em 0.15em; border: 1px solid #2c333d;
+    border-radius: 6px; line-height: 1.2; background: #10141b; color: #b9c3ce;
+  }
+  .tl div.pivot { border-color: var(--bad); color: var(--bad); font-weight: 700; background: rgba(255,107,107,0.08); }
+
+  .spinbox {
+    border: 2px solid #2c333d; border-radius: 8px; background: #10141b;
+    padding: 0.7em 1em; margin-top: 0.5em; font-size: 0.8em; color: var(--dim);
+    display: flex; align-items: center; gap: 0.6em; justify-content: center;
+  }
+  .spinbox .ring {
+    width: 0.9em; height: 0.9em; border: 3px solid #3a434f; border-top-color: var(--accent);
+    border-radius: 50%; display: inline-block; animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .reveal .progress { color: var(--accent); height: 6px; }
+  .reveal .slide-number { font-size: 20px; background: none; color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================== S1 ============================== -->
+<section>
+  <span class="label"><span class="sid">S1</span> &nbsp;·&nbsp; Act 1 — The Hook</span>
+  <h1>Local-First:<br>Kill the Spinner</h1>
+  <p style="color:var(--dim); font-size:0.8em; margin-top:1em;">
+    A practical architecture walkthrough with honest tradeoffs.<br>
+    Not a rewrite-everything pitch. Not a vendor pitch.
+  </p>
+  <aside class="notes">
+    <p><strong>0:00–0:30 · Act 1 — The Hook</strong></p>
+    <p><strong>Script:</strong> I'm going to show you two versions of the same internal tool before I explain anything. Same data, same database, same feature set. Watch the top-left corner of the screen — that's where the spinner lives.</p>
+    <p><strong>Why this is short:</strong> resist the urge to set up the problem for three minutes. The demo <em>is</em> the problem statement.</p>
+    <p>Then go straight to S2. Do not theorise yet.</p>
+  </aside>
+</section>
+
+<!-- ============================== S2 ============================== -->
+<section>
+  <span class="label"><span class="sid">S2</span> &nbsp;·&nbsp; Act 1 — The Hook</span>
+  <h2>The before</h2>
+  <ul class="keys">
+    <li>Open the grid &nbsp;<strong>spinner</strong></li>
+    <li>Apply a filter &nbsp;<strong>spinner</strong></li>
+    <li>Edit a cell &nbsp;<strong>spinner, row jumps</strong></li>
+    <li>Navigate away and back &nbsp;<strong>spinner</strong></li>
+  </ul>
+  <p style="margin-top:0.8em; font-size:1.05em; color:var(--accent);">Count the waits.</p>
+  <aside class="notes">
+    <p><strong>0:30–1:15 · Act 1 — The Hook</strong></p>
+    <p><strong>On screen:</strong> Live or recorded — the fetch-and-spinner version. Open the grid (spinner). Apply a filter (spinner). Edit a cell (spinner, row jumps). Navigate away and back (spinner).</p>
+    <p><strong>Script:</strong> Nothing here is broken. This is a competent app, built the way we all build them. Count the waits.</p>
+    <p><strong>Note:</strong> You need this baseline. "Instant" is not impressive in isolation — it's only impressive as a contrast.</p>
+    <p><strong>If running long:</strong> trim to two spinner beats instead of four. Saves 20s.</p>
+  </aside>
+</section>
+
+<!-- ============================== S3 ============================== -->
+<section class="center">
+  <span class="label"><span class="sid">S3</span> &nbsp;·&nbsp; Act 1 — The Hook &nbsp;·&nbsp; Beat 1</span>
+  <p class="demo">DEMO</p>
+  <p class="demo-sub">Laptops down.</p>
+  <aside class="notes">
+    <p><strong>1:15–3:30 · Act 1 — The Hook · BEAT 1 · the app is instant (visceral, before any explanation)</strong></p>
+    <p><strong>No slides.</strong> Say: <em>"Laptops down for two minutes, this one only works if you watch it."</em></p>
+    <p><strong>Beats, in order:</strong></p>
+    <ol>
+      <li>Same app, rebuilt. Open the grid — <strong>already populated.</strong> Filter, sort, navigate — instant, no spinner anywhere.</li>
+      <li>Second browser window side by side. Type in the left → appears in the right immediately. <strong>Let the silence sit.</strong></li>
+      <li>Open the Network panel. Filter, sort, navigate again → <strong>zero requests.</strong> Tap the empty panel.</li>
+      <li>Throttle to Slow 3G. Add a record → still instant. <em>"The network is still slow. The UI just stopped waiting for it."</em></li>
+    </ol>
+    <p><strong>Script to close the act:</strong> No spinner, no loading skeleton, no refetch after the edit. Now let me show you how little code that took, and then be honest with you about what it cost.</p>
+    <p><strong>Demo build notes:</strong> keep both versions of the same app runnable — the contrast in S2→S3 is your strongest 45 seconds, don't fake it with slides. Local database + local sync engine, never a cloud endpoint; conference wifi will humiliate you. Pre-seed data — an empty grid demos nothing. Editor font ≥18pt, browser zoom ≥150%, notifications off, clean browser profile. Record everything as video and embed it: present live if the room cooperates, cut to tape at the first sign of trouble.</p>
+    <p><strong>Optional upgrade (Appendix B2):</strong> a todo-list demo invites "sure, but that's twenty rows." Electric's own demo is "LinearLarge" — a Linear clone over 500,000 issues that loads instantly, with infinite scroll filling in subsets as you scroll and filter predicates narrowing to ~25k issues live; the network panel shows the subset requests arriving. If you can seed a few hundred thousand rows and switch the collection to <code>on-demand</code>, do it. Also steal hover preloading: preloading a route's live queries on link hover gives ~300ms of grace, so the data is already there when the user clicks.</p>
+    <p><strong>If running long:</strong> cut beats 3 and 4 (empty network panel, 3G throttle), keep 1 and 2. Saves 40s. <strong>Never cut beats 1–2.</strong></p>
+  </aside>
+</section>
+
+<!-- ============================== S4 ============================== -->
+<section>
+  <span class="label"><span class="sid">S4</span> &nbsp;·&nbsp; Act 2 — What Just Happened</span>
+  <h2>The code delta</h2>
+<pre class="plain"><span class="c">BEFORE                          AFTER</span>
+fetch on mount              <span class="a">→</span>   read from local replica
+<span class="strike">isLoading branch</span>            <span class="a">→</span>   <span class="g">(deleted)</span>
+render                          render
+mutate + await              <span class="a">→</span>   write locally, sync in background
+<span class="strike">invalidate + refetch</span>        <span class="a">→</span>   <span class="g">(deleted)</span></pre>
+  <blockquote class="mid">"Eliminating stale data, loading spinners and manual data wiring."</blockquote>
+  <p class="attrib">Electric, <em>"Super fast apps on sync with TanStack DB"</em>, 2025-07-29<br>
+  <span class="u">https://electric.ax/blog/2025/07/29/super-fast-apps-on-sync-with-tanstack-db</span></p>
+  <aside class="notes">
+    <p><strong>3:30–5:00 · Act 2 — What Just Happened</strong></p>
+    <p><strong>On screen:</strong> Before and after, side by side. Framework-neutral labels — no library names yet.</p>
+    <p><strong>Script:</strong> Two things are gone: the loading branch and the invalidation. They're gone for the same reason — there's no cache to be stale, because there's a replica that's already correct.</p>
+    <p><strong>Optional beat, worth ~90 seconds if you have them (Appendix B5):</strong> <em>"and here's a second-order effect we didn't anticipate — this is also the code we want our agents writing."</em> The argument: declarative data bindings produce LLM-generated code that scales, and imperative fetching doesn't. An agent writing component code with inline fetches produces "fetch spaghetti" — plausible-looking components each making uncoordinated network requests, with no control over what fetches what during render. Declarative bindings look almost identical on the surface but let the system own transfer, placement and retention, so the generated code stays maintainable. It's an argument about code quality, not user experience, so it reaches the people who don't believe the spinner is a real problem.</p>
+  </aside>
+</section>
+
+<!-- ============================== S5 ============================== -->
+<section>
+  <span class="label"><span class="sid">S5</span> &nbsp;·&nbsp; Act 2 — What Just Happened</span>
+  <h2>Like React, but for data loading</h2>
+  <table class="tight" style="font-size:0.8em;">
+    <tr><td class="k">Then</td><td>jQuery + manual DOM updates &nbsp;<span style="color:var(--accent)">→</span>&nbsp; declarative UI</td></tr>
+    <tr><td class="k">Now</td><td>imperative fetching &nbsp;<span style="color:var(--accent)">→</span>&nbsp; declarative data bindings</td></tr>
+  </table>
+  <div class="flow">
+    <div class="box">database</div><div class="arw">→</div>
+    <div class="box">sync<br>engine</div><div class="arw">→</div>
+    <div class="box">local replica<br>in browser</div><div class="arw">→</div>
+    <div class="box">live<br>query</div><div class="arw">→</div>
+    <div class="box">UI</div>
+  </div>
+  <div class="backflow">UI &nbsp;→&nbsp; write path &nbsp;→&nbsp; database &nbsp; <span style="color:var(--dim)">(separate route)</span></div>
+  <blockquote class="mid" style="margin-top:0.5em;">"It is kind of like React, but for data loading instead of just UI"</blockquote>
+  <p class="attrib">James Arthur, co-founder/CEO, Electric — conference talk</p>
+  <aside class="notes">
+    <p><strong>5:00–6:00 · Act 2 — What Just Happened</strong></p>
+    <p><strong>Script:</strong> Reads come from memory in the browser, kept live by a sync engine. Writes apply locally straight away, then travel to the server on a <em>separate</em> path, and get confirmed asynchronously. Reads and writes take different routes — remember that, it's why the last act of this talk exists.</p>
+    <p><strong>Framing (Appendix B4 — use this, it's better than the mechanism description alone):</strong> "It is kind of like React, but for data loading instead of just UI." jQuery and manual DOM updates → declarative UI, as imperative fetching → declarative data bindings. This audience will feel the jQuery analogy immediately.</p>
+    <p><strong>⚠️</strong> The transcript this quote comes from has no stated venue or date in the copy reviewed. Pin down venue and date before citing on a slide. It mentions Sync Conf in SF and a track curated by "Dan," which should let you identify it.</p>
+    <p><strong>Available support if wanted:</strong> "local-first application code talks directly to a local store interface." — Electric, <em>"Super fast apps on sync with TanStack DB"</em>, 2025-07-29.</p>
+  </aside>
+</section>
+
+<!-- ============================== S6 ============================== -->
+<section>
+  <span class="label"><span class="sid">S6</span> &nbsp;·&nbsp; Act 3 — Where The Idea Came From</span>
+  <blockquote class="big">"Local-first software: You own your data, in spite of the cloud"</blockquote>
+  <p class="attrib" style="font-size:0.68em;">Ink &amp; Switch, April 2019 &nbsp;·&nbsp; <span class="u">https://www.inkandswitch.com/essay/local-first/</span></p>
+  <blockquote class="big" style="border-left-color:var(--warn); margin-top:0.7em;">"we treat the copy of the data on your local device — your laptop, tablet, or phone — as the <span style="color:var(--warn)">primary copy</span>."</blockquote>
+  <blockquote class="mid">the term reflects prioritizing "the use of local storage (the disk built into your computer) and local networks"</blockquote>
+  <aside class="notes">
+    <p><strong>6:00–7:00 · Act 3 — Where The Idea Came From</strong></p>
+    <p><strong>Script:</strong> This is where we got the idea. It's a 2019 research essay, and it's excellent — read it this week. It defines local-first software around one architectural commitment: the copy on your device is the <em>primary</em> copy. Not a cache. Primary.</p>
+    <p><strong>⚠️ Accuracy flag 1 — the essay's author list.</strong> Commonly cited as Kleppmann, Wiggins, van Hardenberg and McGranaghan. Confirm order and spelling from the essay page before crediting on this slide.</p>
+    <p><strong>Legitimising detail (Appendix B4):</strong> Electric's own founder credits Ink &amp; Switch by name as having "defined the local-first software manifesto," and routes the rollback question explicitly to their thinking on modes of collaboration. The vendor pointing at the paper legitimises this whole framing device.</p>
+  </aside>
+</section>
+
+<!-- ============================== S7 ============================== -->
+<section>
+  <span class="label"><span class="sid">S7</span> &nbsp;·&nbsp; Act 3 — Where The Idea Came From</span>
+  <h2>Seven ideals</h2>
+  <table class="tight">
+    <tr><td class="k">1</td><td>"No spinners: your work at your fingertips"</td></tr>
+    <tr><td class="k">2</td><td>"Your work is not trapped on one device"</td></tr>
+    <tr><td class="k">3</td><td>"The network is optional"</td></tr>
+    <tr><td class="k">4</td><td>"Seamless collaboration with your colleagues"</td></tr>
+    <tr><td class="k">5</td><td>"The Long Now"</td></tr>
+    <tr><td class="k">6</td><td>"Security and privacy by default"</td></tr>
+    <tr><td class="k">7</td><td>"You retain ultimate ownership and control"</td></tr>
+  </table>
+  <p class="attrib">All seven in the essay's own words. Ink &amp; Switch, April 2019 &nbsp;·&nbsp; <span class="u">https://www.inkandswitch.com/essay/local-first/</span></p>
+  <aside class="notes">
+    <p><strong>7:00–8:00 · Act 3 — Where The Idea Came From</strong></p>
+    <p><strong>Script:</strong> Ideal number one is literally called "No spinners." I stole the title of this talk from a 2019 research paper.</p>
+    <p><strong>Engagement:</strong> Reliable laugh, and it signals you read the source rather than the launch blogs.</p>
+  </aside>
+</section>
+
+<!-- ============================== S8 ============================== -->
+<section>
+  <span class="label"><span class="sid">S8</span> &nbsp;·&nbsp; Act 3 &nbsp;·&nbsp; Beat 2 &nbsp;·&nbsp; the honest centre of the talk</span>
+  <h2>We took one.</h2>
+  <table class="tight">
+    <tr class="hl"><td class="k" style="color:inherit">1</td><td>"No spinners: your work at your fingertips"</td></tr>
+    <tr class="dim"><td>2</td><td>"Your work is not trapped on one device"</td></tr>
+    <tr class="dim"><td>3</td><td>"The network is optional"</td></tr>
+    <tr class="dim"><td>4</td><td>"Seamless collaboration with your colleagues"</td></tr>
+    <tr class="dim"><td>5</td><td>"The Long Now"</td></tr>
+    <tr class="dim"><td>6</td><td>"Security and privacy by default"</td></tr>
+    <tr class="dim"><td>7</td><td>"You retain ultimate ownership and control"</td></tr>
+  </table>
+  <p style="margin-top:0.5em; font-size:1.0em; color:var(--warn);">By the paper's own definition, what I just demoed is <strong>not local-first software.</strong></p>
+  <aside class="notes">
+    <p><strong>8:00–9:30 · Act 3 — Where The Idea Came From · BEAT 2 · "We took one ideal out of seven, on purpose" (subverts the title's implied promise)</strong></p>
+    <p><strong>Script:</strong> Here's the part I want to be very clear about, because a lot of talks with "local-first" in the title are not.</p>
+    <p>We did not build a local-first application. We took ideal number one and left the other six on the table — deliberately. Our data still lives on a server, the server is still the source of truth, and if that server goes away our users have nothing. By the paper's own definition, what I just demoed <strong>is not local-first software.</strong> It's a normal client-server app that reads from a live replica.</p>
+    <p>And that was the right call for an internal tool. We wanted the feel of ideal one; we did not want to take on ideals three through seven, which — as I'll show you at the end — is a <em>dramatically</em> larger project than it looks.</p>
+    <p><strong>Why this slide matters:</strong> it inoculates you against the only real attack on this talk, it makes the scope credible, and it sets up Act 6 as a payoff instead of a confession. <strong>Never cut this slide.</strong></p>
+    <p><strong>Optional support:</strong> the essay's comparison table scores Firebase/CloudKit/Realm as ✗ on longevity, privacy and user control — a useful way to show that "fast cloud app with live sync" is a known, named category that isn't local-first. Also from the essay: servers persist as "cloud peers" "rather than as sources of truth".</p>
+    <p><strong>Abstract reconciliation — cover the gap verbally here:</strong> <em>"the abstract for this talk promised you offline; let me tell you what I found when I actually tested that."</em> Turns the gap into a hook and makes the honesty feel deliberate rather than corrective.</p>
+  </aside>
+</section>
+
+<!-- ============================== S9 ============================== -->
+<section>
+  <span class="label"><span class="sid">S9</span> &nbsp;·&nbsp; Act 4 — The Pattern, Not The Products</span>
+  <h2>Three replaceable roles</h2>
+  <table>
+    <thead><tr><th>Role</th><th>What it does</th><th>Where it runs</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Sync engine</td><td>Streams a filtered subset of server data to clients and keeps it live</td><td>Server + wire protocol</td></tr>
+      <tr><td class="k">Local store<br>+ query layer</td><td>Holds the replica in memory, answers queries reactively, manages optimistic state</td><td>Browser</td></tr>
+      <tr><td class="k">Write path</td><td>Takes local writes to the server and confirms them</td><td>Your existing API</td></tr>
+    </tbody>
+  </table>
+  <blockquote class="mid" style="margin-top:0.6em;">"I think ideally every developer would love to be able to interact with their APIs as if they were local-first."</blockquote>
+  <p class="attrib">Tanner Linsley, in <em>"Super fast apps on sync with TanStack DB"</em>, Electric, 2025-07-29</p>
+  <aside class="notes">
+    <p><strong>9:30–11:00 · Act 4 — The Pattern, Not The Products</strong></p>
+    <p><strong>Script:</strong> This is the pattern. Three roles. We happened to fill them with a particular set of libraries, but the important thing is that they're three <em>separate</em> decisions, and the third one is usually your existing API — you don't replace it.</p>
+    <p><strong>Why this slide exists:</strong> it's what stops the talk becoming a product walkthrough. The audience should leave needing three pieces, not two package names.</p>
+    <p><strong>Vendor-risk backup:</strong> this slide is also the mitigation. Because the write path stays on your own API and the sync engine is a separate, swappable role, the blast radius of an engine change is the sync layer, not your application.</p>
+  </aside>
+</section>
+
+<!-- ============================== S10 ============================== -->
+<section class="dense">
+  <span class="label"><span class="sid">S10</span> &nbsp;·&nbsp; Act 4 — The Pattern, Not The Products</span>
+  <h2>What else fits each slot</h2>
+  <table class="tight" style="font-size:0.72em;">
+    <thead><tr><th>Project</th><th>Characterisation</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Convex</td><td>End-to-end reactive database with a reactive programming model</td></tr>
+      <tr><td class="k">Ditto</td><td>Mature edge sync engine, offline-focused</td></tr>
+      <tr><td class="k">Instant</td><td>Reactive database system</td></tr>
+      <tr><td class="k">LiveStore</td><td>Sync engine built on an event-sourced change flow</td></tr>
+      <tr><td class="k">Jazz</td><td>Reactive database with peer-to-peer end-to-end encryption</td></tr>
+      <tr><td class="k">PowerSync</td><td>Mature Postgres sync engine, syncs into SQLite in the client</td></tr>
+      <tr><td class="k">RxDB</td><td>Client database with sync</td></tr>
+      <tr><td class="k">Zero (Rocicorp)</td><td>Advanced incremental view maintenance and query-driven sync</td></tr>
+    </tbody>
+  </table>
+  <p class="attrib">Characterisations per James Arthur, co-founder/CEO, Electric — conference talk</p>
+  <div class="callout" style="font-size:0.76em;"><span class="t">Different family entirely:</span> Automerge, Yjs, Loro, Liveblocks — these make the <em>client</em> replica primary and merge with CRDTs. That's the road to the other six ideals, and it's Act 6.</div>
+  <aside class="notes">
+    <p><strong>11:00–12:30 · Act 4 — The Pattern, Not The Products</strong></p>
+    <p><strong>Script:</strong> Name what we used, in one sentence, and move on. <em>"We used ElectricSQL for the sync engine and TanStack DB for the local store, on top of the tRPC API we already had. Any row in this table would have taught the same lesson."</em></p>
+    <p><strong>Framing for "why not one of these?" (Appendix B3 Q33):</strong> the alternatives largely require an opinionated greenfield stack — they want to be your one true stack, which means rewriting existing systems and accepting lock-in. Electric's pitch is that it works with any Postgres and any HTTP-speaking stack, with writes staying on your own API. Be even-handed: that's a real differentiator <em>and</em> it's the vendor's own positioning, so present it as "why it fit our constraints" rather than as a verdict. Several of these are excellent and better-suited to different problems.</p>
+    <p>Jazz's peer-to-peer end-to-end encryption is the single best pointer for anyone in the room who cares about the paper's ideal six.</p>
+    <p><strong>⚠️ Verify this slide before presenting (Accuracy flag 3).</strong> Positioning moves fast in this space. Re-check each entry — particularly whether any server-authoritative engine has since shipped durable offline support, which would undercut S15. Also: the source transcript's venue and date are not stated in the copy reviewed — pin them down before citing on a slide.</p>
+    <p><strong>Available support:</strong> "The next frontier, with much bigger gains, across UX, DX and AX lies in local-first, sync engine architecture." — Electric, 2025-07-29.</p>
+  </aside>
+</section>
+
+<!-- ============================== S11 ============================== -->
+<section class="dense">
+  <span class="label"><span class="sid">S11</span> &nbsp;·&nbsp; Act 5 — What It Cost Us &nbsp;·&nbsp; Wall 1</span>
+  <h2>Authorization becomes<br>a sync boundary</h2>
+<pre class="plain">SHAPE  table: users
+       where: <span class="r">&mdash;   ← no filter at all</span>
+       <span class="r">→ every user row, to every logged-in client</span></pre>
+  <ul class="keys" style="font-size:0.82em;">
+    <li>Not authorizing <strong>endpoints</strong> — authorizing <strong>subsets of tables</strong></li>
+    <li>Wrong endpoint = leak one response. Wrong filter = <strong>replicate a table</strong></li>
+  </ul>
+  <blockquote class="mid">"A sync engine may provide some hooks and options but should not prescribe a solution."</blockquote>
+  <p class="attrib">James Arthur, <em>"A new approach to building Electric"</em>, 2024-07-17 &nbsp;·&nbsp; <span class="u">https://electric.ax/blog/2024/07/17/electric-next</span></p>
+  <aside class="notes">
+    <p><strong>12:30–14:00 · Act 5 — What It Cost Us (the substance) · Wall 1</strong></p>
+    <p><strong>On screen:</strong> The shape/subscription definition with its filter clause highlighted in red.</p>
+    <p><strong>Script:</strong> This is the big one. You're no longer authorizing <em>endpoints</em>, you're authorizing <em>subsets of tables</em>, and the filter has to live on the server where the client can't touch it. Get an endpoint wrong and you leak one response. Get a sync filter wrong and you replicate a table into somebody's browser.</p>
+    <p>Concrete example worth showing: a shape with no filter at all, syncing every user row to every logged-in client. Easy to write, invisible in the UI, and now sitting in devtools for anyone to read.</p>
+    <p>Support with Electric's own position on this — they explicitly declined to solve it for you: <em>"A sync engine may provide some hooks and options but should not prescribe a solution."</em></p>
+    <p><strong>Act 5 framing note:</strong> this act is the most valuable in the talk because it's the part only you can give — it comes from your build, not from anyone's docs. Use real war stories. Only claim walls you actually hit: <em>"we hit the first two; the other two are well documented and we're expecting them"</em> is stronger than implying four battle scars.</p>
+    <p><strong>Backup facts:</strong> a shape is "a filtered view on a database table" — single table plus an optional <code>where</code> clause and an optional <code>columns</code> list, so you can project away columns the client shouldn't receive as well as filter rows. Single-table only, so anything needing a join for its authorization decision has to be denormalized, resolved in the filter, or kept off the sync path. <strong>Never cut this slide.</strong></p>
+  </aside>
+</section>
+
+<!-- ============================== S12 ============================== -->
+<section>
+  <span class="label"><span class="sid">S12</span> &nbsp;·&nbsp; Act 5 — What It Cost Us &nbsp;·&nbsp; Wall 2</span>
+  <h2>Data loading becomes<br>your job again</h2>
+  <table>
+    <thead><tr><th>Mode</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><code>eager</code><br><span style="font-weight:400;color:var(--dim)">(default)</span></td><td>Syncs everything on preload; ready when complete</td></tr>
+      <tr><td class="k"><code>on-demand</code></td><td>Syncs incremental snapshots <strong>as the collection is queried</strong>; ready after the first snapshot</td></tr>
+      <tr><td class="k"><code>progressive</code></td><td>Full sync in the background, with incremental snapshots giving a fast path to what queries need first</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:0.6em; font-size:0.95em;">The wall isn't row count. It's that <span style="color:var(--warn)">data loading is a design decision again</span> — the thing sync promised to take away.</p>
+  <aside class="notes">
+    <p><strong>14:00–15:00 · Act 5 — What It Cost Us · Wall 2</strong></p>
+    <p><strong>Corrected — do not present the old version of this wall.</strong> The naive framing ("only works for small datasets" / "~10k rows" / "bounded working sets") is out of date. Query-driven sync changes the ceiling substantially. The three modes are verified present in this codebase's installed <code>@tanstack/electric-db-collection</code>: <code>syncMode</code> accepts <code>eager</code> (default), <code>on-demand</code> and <code>progressive</code>. The source transcript only mentions <code>on-demand</code>; <code>progressive</code> is real and is often the better default for a mid-sized table.</p>
+    <p><strong>Script:</strong> The naive version of this wall is "it only works for small datasets." That was true and it's now mostly wrong. With <code>on-demand</code>, the predicates from your live queries get pushed down to the collection, and it syncs matching subsets at runtime. The shape you defined server-side becomes the <strong>outer boundary</strong> of what <em>could</em> ever sync; the subsets are ANDed inside it. That gives you pagination and infinite scroll over datasets far larger than memory.</p>
+    <p>So the real wall isn't row count, it's that <strong>data loading is a design decision again</strong> — the thing sync promised to take away. You're now choosing per collection whether it's eager, on-demand, or progressive, and getting it wrong shows up as either a slow first paint or a stall mid-scroll. That's a better problem than the one you had, but it isn't zero.</p>
+    <p><strong>Say this:</strong> <em>"Sync doesn't delete data loading. It moves it from your components into your collection configuration, which is a much better place for it — but you still have to think."</em></p>
+    <p><strong>Q&amp;A backup:</strong> Electric's own demo of this pattern runs a Linear clone over 500,000 issues with instant initial load and infinite scroll — the client only ever holds what's been asked for. Reframe the ceiling question as "can the data this user needs right now be expressed as a query predicate?" If the access pattern is genuinely "scan everything" — analytics, reporting, aggregate-over-all-rows — keep it on a conventional fetch; that's a warehouse query, not an app query. And the client can only ever <em>narrow</em> inside the server-defined shape, never widen.</p>
+  </aside>
+</section>
+
+<!-- ============================== S13 ============================== -->
+<section>
+  <span class="label"><span class="sid">S13</span> &nbsp;·&nbsp; Act 5 — What It Cost Us &nbsp;·&nbsp; Wall 3</span>
+  <h2>Conflicts</h2>
+<pre class="plain">user A edits  status  <span class="a">→</span>  <span class="g">value A</span>
+user B edits  status  <span class="a">→</span>  <span class="w">value B</span>
+                         <span class="c">─────────</span>
+the row now holds        <span class="w">value B</span>    <span class="r">one survivor</span></pre>
+  <ul class="keys" style="font-size:0.9em;">
+    <li>Server owns the primary copy &nbsp;→&nbsp; <strong>row-level last-write-wins</strong></li>
+    <li>No CRDT here to save you — that's the other family</li>
+    <li>The domain question: <strong>is silent overwrite acceptable?</strong></li>
+  </ul>
+  <aside class="notes">
+    <p><strong>15:00–16:00 · Act 5 — What It Cost Us · Wall 3</strong></p>
+    <p><strong>On screen:</strong> Two users, same field, two values, one survivor.</p>
+    <p><strong>Script:</strong> Because the server owns the primary copy, conflict resolution is row-level last-write-wins. Two people edit the same field, one silently loses. There's no CRDT in this architecture to save you — that's the other family. So the question for your domain is: <em>is silent overwrite acceptable here?</em> For a status field on an internal ticket, usually yes. For anything a human typed at length, no.</p>
+    <p><strong>Q&amp;A backup — it's not either/or.</strong> The two families compose: the write you send to the server can be a logical operation applied to a CRDT structure stored <em>in</em> Postgres (<code>pg_crdt</code>), and there are Yjs and Automerge integrations for exactly this. <em>"You pick per-field, not per-app. Most of our data is last-write-wins and that's correct. If we add a collaborative description field tomorrow, that field gets a CRDT and nothing else changes."</em></p>
+    <p><strong>If running long:</strong> fold S14 (migrations) into one sentence here. Saves 30s.</p>
+  </aside>
+</section>
+
+<!-- ============================== S14 ============================== -->
+<section>
+  <span class="label"><span class="sid">S14</span> &nbsp;·&nbsp; Act 5 — What It Cost Us &nbsp;·&nbsp; Wall 4</span>
+  <h2>Schema migrations</h2>
+<pre class="plain">   migration
+       <span class="a">│</span>
+  <span class="a">┌────┼────┬────┬────┐</span>
+  <span class="w">▼</span>    <span class="w">▼</span>    <span class="w">▼</span>    <span class="w">▼</span>    <span class="w">▼</span>
+ browsers running <span class="r">yesterday's bundle</span></pre>
+  <ul class="keys" style="font-size:0.92em;">
+    <li>Schema changes propagate to replicas in browsers <strong>you don't control</strong></li>
+    <li>Additive changes are fine</li>
+    <li>Renames and type changes: <strong>treat it like a mobile app release</strong></li>
+  </ul>
+  <aside class="notes">
+    <p><strong>16:00–16:30 · Act 5 — What It Cost Us · Wall 4</strong></p>
+    <p><strong>On screen:</strong> A migration rippling out to N browsers running yesterday's bundle.</p>
+    <p><strong>Script:</strong> Your schema changes now propagate to live replicas in browsers you don't control, running whatever version of the app they loaded this morning. Additive changes are fine. Renames and type changes need the same care you'd give a mobile app release.</p>
+    <p><strong>Q&amp;A backup:</strong> expand-and-contract works — add the new column, dual-write, migrate readers, then drop. Column removals need the same discipline as renames and type changes.</p>
+    <p><strong>If running long:</strong> this is the first thing to cut — fold into one sentence on S13. Saves 30s.</p>
+  </aside>
+</section>
+
+<!-- ============================== S15 ============================== -->
+<section class="center">
+  <span class="label"><span class="sid">S15</span> &nbsp;·&nbsp; Act 6 — Why All Seven Is Hard &nbsp;·&nbsp; Beat 3</span>
+  <p class="demo">DEMO</p>
+  <p class="demo-sub">Watch ideal #3 fail.</p>
+  <aside class="notes">
+    <p><strong>16:30–17:30 · Act 6 — Why All Seven Is Hard · BEAT 3 · an offline write silently vanishes (tension)</strong></p>
+    <p><strong>No slides.</strong> Back to the demo app.</p>
+    <ol>
+      <li>Devtools → Offline.</li>
+      <li>Add a record. It appears. <strong>Wait.</strong> It vanishes.</li>
+      <li>Reload while still offline → blank page.</li>
+    </ol>
+    <p><strong>Script (corrected per Appendix B3 Q30 — say "in the configuration we shipped"):</strong> That's not a bug, that's <strong>the configuration we shipped</strong>, and it's the clearest possible illustration of what "we only took ideal one" means. The server owns the primary copy, so my local write was only ever <em>tentative</em> — it needed a confirmation that never arrived, so it rolled back. And the reload failed because, <strong>in the configuration we shipped</strong>, there is no durable local copy to boot from.</p>
+    <p>Ideal three is "the network is optional." For us the network is not optional. It's just no longer <em>in front of the user</em>.</p>
+    <p><strong>⚠️ Do NOT say the architecture forbids persistence.</strong> PGlite is Postgres compiled for the browser with a sync adapter, so durable local storage <em>is</em> available in this ecosystem — this rollback is a property of our in-memory configuration, not a hard ceiling of the family. What durable reads still don't give you is offline <em>writes</em>: those need a queue that survives reload plus a retry and reconciliation story, and the write path is deliberately left to you. So: persistence is buyable, ideal three is still a project, and the honest phrasing is <em>"we didn't take it"</em> rather than <em>"it's impossible."</em> It's a one-word fix that protects you from a knowledgeable heckle.</p>
+    <p><strong>Rehearse this specifically.</strong> The record must stay visible long enough for the audience to <em>register</em> it before it disappears. If it vanishes in 200ms nobody sees the point — consider adding an artificial delay to the failure path for the demo build, and say that you did. <strong>Never cut this slide.</strong></p>
+  </aside>
+</section>
+
+<!-- ============================== S16 ============================== -->
+<section>
+  <span class="label"><span class="sid">S16</span> &nbsp;·&nbsp; Act 6 — Why All Seven Is Hard &nbsp;·&nbsp; Beat 4</span>
+  <div class="tl">
+    <div>v0.9<br>2024-01-24</div>
+    <div>v0.10<br>2024-04-10</div>
+    <div>v0.11<br>2024-05-14</div>
+    <div class="pivot">PIVOT<br>2024-07-17</div>
+    <div>BETA<br>2024-12-10</div>
+    <div>1.0 GA<br>2025-03-17</div>
+  </div>
+  <blockquote class="big">"Electric Next is a sync engine, not a local-first software platform."</blockquote>
+  <p class="attrib">James Arthur, <em>"A new approach to building Electric"</em>, 2024-07-17 &nbsp;·&nbsp; <span class="u">https://electric.ax/blog/2024/07/17/electric-next</span></p>
+  <blockquote class="mid" style="margin-top:0.5em;">"holding on to lots of very complex guarantees like <span style="color:var(--warn)">finality of local writes and referential integrity</span>"</blockquote>
+  <div class="callout" style="font-size:0.8em;">
+    <span class="t">The inventors of CRDTs are on this team.</span>
+    The rabbit hole is "PhD-level deep." They still put write-path CRDTs out of scope.
+  </div>
+  <p class="attrib">Both: James Arthur, co-founder/CEO, Electric — conference talk</p>
+  <aside class="notes">
+    <p><strong>17:30–19:00 · Act 6 — Why All Seven Is Hard · BEAT 4 · the team best equipped to build the full ideal deleted their own implementation (authority flip)</strong></p>
+    <p><strong>Script:</strong> So why didn't we just build the full seven? Because in 2024 a team of distributed-systems researchers did exactly that — bidirectional sync into an embedded client database, with finality of local writes as a core guarantee, which is essentially the paper's architecture. Eleven months later they deleted it and started over. Their postmortem is unusually candid:</p>
+    <p>"Coming from a research background, we wanted the system to be optimal" — and so "we often picked the more complex solution from the design space."</p>
+    <p>"The complexity of the stack has provided a wide surface for bugs."</p>
+    <p>A system that "demos well, with magic sync APIs but that never actually scales out reliably."</p>
+    <p><strong>"Electric Next is a sync engine, not a local-first software platform."</strong></p>
+    <p>And on the new sequencing: "start with read-path only" … "This explicitly reduces the capability of the system in the short term."</p>
+    <p>"Electric Next embraces tentativity."</p>
+    <p><strong>Script to land it:</strong> They reclassified themselves <em>out</em> of the category. Finality of local writes went from headline differentiator to, in their words, "no longer a key tenet of the system design." That's not a company failing — that's the strongest available evidence about how expensive ideals three through seven actually are.</p>
+    <p><strong>Strongest available point (Appendix B4) — land this hard:</strong> "the inventors of CRDTs" are on Electric's team, and the rabbit hole is "PhD-level deep" — yet they still put write-path CRDTs out of scope. The people who invented the technology chose not to make it the default. First-party confirmation of the pivot narrative: "Solving write-path sync in the general case is extremely hard, and we actually tried to do it with an earlier version of the product… holding on to lots of very complex guarantees like finality of local writes and referential integrity" — which adds <em>referential integrity</em> to the list of abandoned guarantees.</p>
+    <p><strong>⚠️ Accuracy flag 2 — the pivot post never says "CRDT" or "SQLite."</strong> It refers generally to syncing "into embedded databases in the client." The old line <em>was</em> CRDT-based, but source that from the v0.x docs rather than this post. Safe phrasing, directly supportable: <em>"bidirectional sync into an embedded client database, with finality of local writes."</em></p>
+    <p><strong>Supporting material from the same post, if you need it:</strong> "These decisions not only made Electric more complex to use but also more complex to develop." It cites Gall's law — "A complex system that works is invariably found to have evolved from a simple system that worked" — and <em>Worse is Better</em>: "there is a point where less functionality ('worse') is a preferable option ('better')." Websockets were dropped for HTTP because they "are also more stateful and harder to cache," and the old codebase is frozen: "we are not supporting the old system." Version timeline detail: v0.10 added shape filtering; v0.11 put Postgres in the client and was the last of the pre-pivot line; TanStack DB integration announced 2025-07-29. <strong>Never cut the headline quote.</strong></p>
+  </aside>
+</section>
+
+<!-- ============================== S17 ============================== -->
+<section>
+  <span class="label"><span class="sid">S17</span> &nbsp;·&nbsp; Act 6 — Why All Seven Is Hard</span>
+  <h2>And the other camp paid too</h2>
+  <table class="tight" style="font-size:0.8em;">
+    <thead><tr><th>What worked</th><th>What didn't</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Merging worked reliably<br>Paired beautifully with reactive UI code<br>CRDTs are "multi-user from the ground up"</td>
+        <td>Retained edit history bloated storage and performance<br>Network transport remained unresolved</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="attrib">Ink &amp; Switch's own prototype findings — Automerge and Hypermerge; Trellis, Pixelpusher, PushPin.<br>
+  <em>"Local-first software: You own your data, in spite of the cloud"</em>, April 2019 &nbsp;·&nbsp; <span class="u">https://www.inkandswitch.com/essay/local-first/</span></p>
+  <p style="margin-top:0.6em; font-size:1.0em;">Both camps, from opposite directions:<br>
+  <span style="color:var(--warn)">the ownership ideals are where the cost lives.</span></p>
+  <aside class="notes">
+    <p><strong>19:00–19:45 · Act 6 — Why All Seven Is Hard</strong></p>
+    <p><strong>On screen:</strong> Ink &amp; Switch's own prototype findings.</p>
+    <p><strong>Script:</strong> For symmetry, because otherwise I'm just doing a different vendor's marketing. The paper's authors built their own CRDT stack — Automerge, and three prototype apps — and reported honestly: merging worked reliably and paired beautifully with reactive UI code. <em>And</em> retained edit history bloated storage and performance, and network transport remained unresolved.</p>
+    <p>Both camps arrived at the same conclusion from opposite directions: <strong>the ownership ideals are where the cost lives.</strong> Which is why we took the one that was cheap.</p>
+    <p><strong>Optional, if you have prep time:</strong> a 30-second CRDT contrast here — two <code>Y.Doc</code> instances in a single HTML file, both "offline," both edited, then merged losslessly — makes the final act land much harder because the audience <em>sees</em> the alternative rather than hearing about it. Implement the partition as a boolean that queues updates instead of applying them: no server, no build step, nothing that can fail on stage.</p>
+    <p><strong>If running long:</strong> compress to a single sentence inside S16. Saves 45s. <strong>Don't cut entirely</strong> — it's what keeps the ending balanced rather than anti-CRDT.</p>
+    <p><strong>Q&amp;A backup:</strong> from the essay, servers persist as "cloud peers" "rather than as sources of truth."</p>
+  </aside>
+</section>
+
+<!-- ============================== S18 ============================== -->
+<section>
+  <span class="label"><span class="sid">S18</span> &nbsp;·&nbsp; Act 6 — Why All Seven Is Hard &nbsp;·&nbsp; Close</span>
+  <h2>Decision rule</h2>
+  <table class="tight" style="font-size:0.76em;">
+    <tbody>
+      <tr><td class="k" style="color:var(--good)">Kill the spinner when</td><td>the data a user needs can be expressed as a query predicate · multiple users on shared data · read-heavy · latency is a real user complaint</td></tr>
+      <tr><td class="k">Keep fetching when</td><td>the access pattern is scan-everything (analytics, aggregates over all rows) · report-shaped or one-shot · single user, single session · you can't own the authorization model</td></tr>
+      <tr><td class="k" style="color:var(--accent)">Go all the way to CRDTs when</td><td>offline is a hard requirement · concurrent edits to the same field are normal · users must own data independently of your service</td></tr>
+    </tbody>
+  </table>
+  <div class="fragment fade-in">
+    <div class="spinbox"><span class="ring"></span> Loading projects…</div>
+    <p class="attrib" style="text-align:center;">An official starter template for one of these engines, on cold boot.</p>
+  </div>
+  <aside class="notes">
+    <p><strong>19:45–21:00 · Act 6 — Why All Seven Is Hard · Decision rule + close</strong></p>
+    <p><strong>Script:</strong> You don't have to pick a side in a research debate. Take ideal one, ship it, and know exactly which six you left behind and why.</p>
+    <p><strong>Final beat (press → to reveal):</strong> screenshot of an official starter template for one of these engines rendering a <code>Loading projects...</code> spinner on cold boot.</p>
+    <p><strong>Closing line:</strong> This is an official starter for one of the tools I showed you, and on cold boot it shows a spinner — because with no durable local copy, there's nothing to boot from. We killed the spinner in the ninety-nine percent of interactions that happen after load. That was worth doing. The other six ideals are still waiting, and now you know what they cost.</p>
+    <p><strong>Note:</strong> don't name the project on that slide. Same joke, no vendor.</p>
+    <p><strong>Then Q&amp;A (~4:00). Three rules:</strong> if you don't know, say "I don't know, I'd have to test that" — this talk's whole credibility rests on the S8 admission, and hedging in Q&amp;A undoes it. Route anything about ideals 3–7 back to S8: <em>"that's one of the six we didn't take, and here's why."</em> Have the numbers ready. If you get cornered: <em>"That's a fair criticism and I don't have a good answer for it"</em> buys back more credibility than a weak defence ever will.</p>
+  </aside>
+</section>
+
+<!-- ============================== References ============================== -->
+<section>
+  <span class="label">Resources &amp; further reading</span>
+  <h3 style="color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; font-size:0.72em;">Primary — verified during preparation</h3>
+  <ul class="keys" style="font-size:0.62em;">
+    <li>Ink &amp; Switch, <em>Local-first software: You own your data, in spite of the cloud</em>, April 2019 — https://www.inkandswitch.com/essay/local-first/</li>
+    <li>James Arthur / Electric, <em>A new approach to building Electric</em>, 2024-07-17 — https://electric.ax/blog/2024/07/17/electric-next</li>
+    <li>Electric, <em>Super fast apps on sync with TanStack DB</em>, 2025-07-29 — https://electric.ax/blog/2025/07/29/super-fast-apps-on-sync-with-tanstack-db</li>
+    <li>Electric, architecture summary — https://electric.ax/AGENTS.md &nbsp;·&nbsp; Blog index — https://electric.ax/blog</li>
+  </ul>
+  <h3 style="color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; font-size:0.72em; margin-top:0.6em;">Research &amp; community</h3>
+  <ul class="keys" style="font-size:0.62em;">
+    <li>Shapiro, Preguiça, Baquero, Zawirski, <em>Conflict-free Replicated Data Types</em>, SSS 2011</li>
+    <li>Kleppmann &amp; Beresford, <em>A Conflict-Free Replicated JSON Datatype</em>, IEEE TPDS 2017 &nbsp;·&nbsp; Kleppmann, <em>CRDTs: The Hard Parts</em> &nbsp;·&nbsp; Ink &amp; Switch, <em>Peritext</em></li>
+    <li>localfirstweb.dev and the Local-First Conf talks</li>
+  </ul>
+  <aside class="notes">
+    <p><strong>Backup slide — Q&amp;A / leave up while taking questions.</strong> Built only from the document's Resources section.</p>
+    <p><strong>⚠️ Research citations:</strong> confirm venue, year and authors before asserting them. A wrong citation in a talk that leans on rigor costs more than an omitted one.</p>
+    <p><strong>⚠️ Engines:</strong> verify current positioning before S10 — sync engines (ElectricSQL, Zero, PowerSync, Replicache), local store/query (TanStack DB, LiveStore, TinyBase, PGlite), CRDT family (Automerge, Yjs, Loro, Liveblocks, Jazz).</p>
+  </aside>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.045,
+    minScale: 0.2,
+    maxScale: 2.0,
+    hash: true,
+    progress: true,
+    slideNumber: 'c/t',
+    controls: true,
+    center: false,
+    transition: 'fade',
+    plugins: [ RevealNotes ]
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  
+@font-face{font-family:'JetBrains Mono';src:url('file:///Volumes/workplace/my-electric-app/talk/deck/public/fonts/jetbrains-mono-normal.woff2') format('woff2');font-weight:400 700;font-display:block}
+@font-face{font-family:'Inter';src:url('file:///Volumes/workplace/my-electric-app/talk/deck/public/fonts/inter-normal.woff2') format('woff2');font-weight:400 700;font-display:block}
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:transparent;font-family:'JetBrains Mono',monospace}
+  .panel{
+    width:1100px;background:#10141a;border:1px solid #232a32;border-radius:14px;
+    overflow:hidden;
+  }
+  .bar{
+    display:flex;align-items:center;justify-content:flex-start;gap:1rem;
+    padding:14px 20px;background:#14181d;border-bottom:1px solid #232a32;
+  }
+  .path{font-size:14px;color:#9ba3ae;letter-spacing:0.01em}
+  .path b{color:#e8eaed;font-weight:500}
+  .badge{
+    font-size:15px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+    padding:5px 12px;border-radius:6px;white-space:nowrap;
+  }
+  .badge.bad{color:#ff6b6b;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.45)}
+  .badge.good{color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.4)}
+  .badge.warn{color:#ffb454;background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.42)}
+  pre{padding:16px 0 18px;font-size:19px;line-height:1.7;background:transparent!important}
+  pre code{background:transparent!important}
+  .row{display:flex;align-items:flex-start;padding:0 20px;position:relative}
+  .row.cold{opacity:.42}
+  .row.hot{background:rgba(232,234,237,.035)}
+  .ln{
+    flex:none;width:46px;text-align:right;padding-right:18px;
+    color:#6b747f;font-size:15px;user-select:none;
+  }
+  .row.hot .ln{color:#e8eaed}
+  .code{white-space:pre;flex:1}
+  .row.has-mark .code{padding-right:150px}
+  .mark{
+    position:absolute;right:18px;top:2px;font-size:15px;font-weight:700;
+    letter-spacing:.09em;text-transform:uppercase;padding:2px 9px;border-radius:5px;
+  }
+  .mark.bad{color:#ff6b6b;background:rgba(255,107,107,.14);border:1px solid rgba(255,107,107,.5)}
+  .mark.good{color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.45)}
+  .mark.warn{color:#ffb454;background:rgba(255,180,84,.12);border:1px solid rgba(255,180,84,.48)}
+  </style></head><body>
+  <div class="panel">
+    <div class="bar">
+      <div class="badge warn">the security perimeter</div>
+    </div>
+    <pre class="shiki vitesse-dark" style="background-color:#121212;color:#dbd7caee" tabindex="0"><code><span class="row cold"><span class="ln">40</span><span class="code"><span style="color:#758575DD">  // Resolve the demo project the caller is actually allowed to see.</span></span></span><span class="row cold"><span class="ln">41</span><span class="code"><span style="color:#CB7676">  const</span><span style="color:#666666"> [</span><span style="color:#BD976A">project</span><span style="color:#666666">]</span><span style="color:#666666"> =</span><span style="color:#4D9375"> await</span><span style="color:#BD976A"> db</span></span></span><span class="row cold ellip"><span class="ln"></span><span class="code">⋯</span></span><span class="row cold"><span class="ln">46</span><span class="code"><span style="color:#80A665">        eq</span><span style="color:#666666">(</span><span style="color:#BD976A">projectsTable</span><span style="color:#666666">.</span><span style="color:#BD976A">name</span><span style="color:#666666">,</span><span style="color:#BD976A"> DEMO_LARGE_PROJECT_NAME</span><span style="color:#666666">),</span></span></span><span class="row cold"><span class="ln">47</span><span class="code"><span style="color:#80A665">        or</span><span style="color:#666666">(</span></span></span><span class="row hot has-mark"><span class="ln">48</span><span class="code"><span style="color:#80A665">          eq</span><span style="color:#666666">(</span><span style="color:#BD976A">projectsTable</span><span style="color:#666666">.</span><span style="color:#BD976A">owner_id</span><span style="color:#666666">,</span><span style="color:#BD976A"> session</span><span style="color:#666666">.</span><span style="color:#BD976A">user</span><span style="color:#666666">.</span><span style="color:#BD976A">id</span><span style="color:#666666">),</span></span><span class="mark warn">server-side</span></span><span class="row hot"><span class="ln">49</span><span class="code"><span style="color:#80A665">          arrayContains</span><span style="color:#666666">(</span><span style="color:#BD976A">projectsTable</span><span style="color:#666666">.</span><span style="color:#BD976A">shared_user_ids</span><span style="color:#666666">,</span><span style="color:#666666"> [</span><span style="color:#BD976A">session</span><span style="color:#666666">.</span><span style="color:#BD976A">user</span><span style="color:#666666">.</span><span style="color:#BD976A">id</span><span style="color:#666666">])</span></span></span><span class="row cold ellip"><span class="ln"></span><span class="code">⋯</span></span><span class="row cold"><span class="ln">55</span><span class="code"><span style="color:#CB7676">  const</span><span style="color:#BD976A"> originUrl</span><span style="color:#666666"> =</span><span style="color:#80A665"> prepareElectricUrl</span><span style="color:#666666">(</span><span style="color:#BD976A">request</span><span style="color:#666666">.</span><span style="color:#BD976A">url</span><span style="color:#666666">)</span></span></span><span class="row cold"><span class="ln">56</span><span class="code"><span style="color:#BD976A">  originUrl</span><span style="color:#666666">.</span><span style="color:#BD976A">searchParams</span><span style="color:#666666">.</span><span style="color:#80A665">set</span><span style="color:#666666">(</span><span style="color:#C98A7D77">`</span><span style="color:#C98A7D">table</span><span style="color:#C98A7D77">`</span><span style="color:#666666">,</span><span style="color:#C98A7D77"> `</span><span style="color:#C98A7D">todos</span><span style="color:#C98A7D77">`</span><span style="color:#666666">)</span></span></span><span class="row cold"><span class="ln">57</span><span class="code"></span></span><span class="row cold"><span class="ln">58</span><span class="code"><span style="color:#4D9375">  if</span><span style="color:#666666"> (</span><span style="color:#CB7676">!</span><span style="color:#BD976A">project</span><span style="color:#666666">)</span><span style="color:#666666"> {</span></span></span><span class="row cold"><span class="ln">59</span><span class="code"><span style="color:#758575DD">    // Deliberately empty shape: better an empty grid than an unfiltered table.</span></span></span><span class="row hot has-mark"><span class="ln">60</span><span class="code"><span style="color:#BD976A">    originUrl</span><span style="color:#666666">.</span><span style="color:#BD976A">searchParams</span><span style="color:#666666">.</span><span style="color:#80A665">set</span><span style="color:#666666">(</span><span style="color:#C98A7D77">`</span><span style="color:#C98A7D">where</span><span style="color:#C98A7D77">`</span><span style="color:#666666">,</span><span style="color:#C98A7D77"> `</span><span style="color:#C98A7D">false</span><span style="color:#C98A7D77">`</span><span style="color:#666666">)</span></span><span class="mark warn">fail closed</span></span><span class="row cold"><span class="ln">61</span><span class="code"><span style="color:#666666">  }</span><span style="color:#4D9375"> else</span><span style="color:#666666"> {</span></span></span><span class="row hot has-mark"><span class="ln">62</span><span class="code"><span style="color:#BD976A">    originUrl</span><span style="color:#666666">.</span><span style="color:#BD976A">searchParams</span><span style="color:#666666">.</span><span style="color:#80A665">set</span><span style="color:#666666">(</span><span style="color:#C98A7D77">`</span><span style="color:#C98A7D">where</span><span style="color:#C98A7D77">`</span><span style="color:#666666">,</span><span style="color:#C98A7D77"> `</span><span style="color:#C98A7D">project_id = $1</span><span style="color:#C98A7D77">`</span><span style="color:#666666">)</span></span><span class="mark warn">the perimeter</span></span><span class="row hot"><span class="ln">63</span><span class="code"><span style="color:#BD976A">    originUrl</span><span style="color:#666666">.</span><span style="color:#BD976A">searchParams</span><span style="color:#666666">.</span><span style="color:#80A665">set</span><span style="color:#666666">(</span><span style="color:#C98A7D77">`</span><span style="color:#C98A7D">params[1]</span><span style="color:#C98A7D77">`</span><span style="color:#666666">,</span><span style="color:#80A665"> String</span><span style="color:#666666">(</span><span style="color:#BD976A">project</span><span style="color:#666666">.</span><span style="color:#BD976A">id</span><span style="color:#666666">))</span></span></span><span class="row cold"><span class="ln">64</span><span class="code"><span style="color:#666666">  }</span></span></span></code></pre>
+  </div>
+  </body></html>
