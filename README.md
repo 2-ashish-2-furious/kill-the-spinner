@@ -37,3 +37,37 @@ These are optional and all off by default. Set them in `.env` and restart the de
 
 See `src/lib/demo-flags.ts` for details.
 
+## References
+
+### Primary sources
+
+- **Ink & Switch**, *Local-first software: You own your data, in spite of the cloud* (2019). This is where the seven ideals come from: [essay](https://www.inkandswitch.com/essay/local-first/) · [PDF](https://www.inkandswitch.com/essay/local-first/local-first.pdf)
+- **James Arthur**, *Why Fetch When You Can Sync? Building Local-First Apps on a Sync Engine Architecture* (InfoQ, 2025): https://www.infoq.com/presentations/local-first-sync-engine/
+- **James Arthur / Electric**, *A new approach to building Electric* (2024). Electric's postmortem on rebuilding as a sync engine: https://electric.ax/blog/2024/07/17/electric-next
+- **Electric**, *Super fast apps on sync with TanStack DB* (2025): https://electric.ax/blog/2025/07/29/super-fast-apps-on-sync-with-tanstack-db
+
+### Articles
+
+- *The Architecture of Local-First Web Development* (Smashing Magazine, 2026): https://www.smashingmagazine.com/2026/05/architecture-local-first-web-development/
+- *Electric links*, a curated reading list from the Electric team: https://electric-sql.slab.com/public/posts/electric-links-g7jzs9ax?shr=x7fygg3cg44l0nf4m5pdnuk4
+
+### Talks
+
+- **Martin Kleppmann**, *CRDTs: The Hard Parts*. Covers where CRDTs get expensive: https://www.youtube.com/watch?v=x7drE24geUw
+
+### Docs: sync engines and local stores
+
+- ElectricSQL (used in this demo): https://electric-sql.com/docs
+- TanStack DB (used in this demo): https://tanstack.com/db
+- Zero (Rocicorp): https://zero.rocicorp.dev/docs
+- PowerSync: https://docs.powersync.com/
+
+### Docs: CRDT libraries
+
+- Automerge: https://automerge.org/
+- Yjs: https://docs.yjs.dev/
+
+### Community
+
+- localfirst.fm, a podcast and resource hub: https://www.localfirst.fm/
+
