@@ -1,0 +1,47 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e4]:
+    - generic [ref=f8e5]:
+      - generic [ref=f8e6]:
+        - generic [ref=f8e7]: Local·First
+        - generic [ref=f8e8]: WebDevCon '26
+      - heading "A read, step by step" [level=2] [ref=f8e9]
+      - img [ref=f8e11]:
+        - generic [ref=f8e12]: the network
+        - generic [ref=f8e13]: in the browser
+        - generic [ref=f8e14]: your servers
+        - generic [ref=f8e22]:
+          - generic [ref=f8e23]: React Component
+          - generic [ref=f8e24]: renders the UI
+          - generic [ref=f8e25]: useLiveQuery()
+          - generic [ref=f8e26]: declares what it needs
+          - generic [ref=f8e27]: TanStack DB Collection
+          - generic [ref=f8e28]: local reactive data store
+          - generic [ref=f8e29]: Authorization Proxy
+          - generic [ref=f8e30]: auth + pins the WHERE
+          - generic [ref=f8e31]: Electric Sync Engine
+          - generic [ref=f8e32]: shape log over HTTP
+          - generic [ref=f8e33]: Postgres
+          - generic [ref=f8e34]: your existing database
+        - generic [ref=f8e38]: "ShapeStream: snapshot + live changes"
+        - generic [ref=f8e39]:
+          - generic [ref=f8e40]:
+            - generic [ref=f8e41]: subscribes
+            - generic [ref=f8e42]: live query
+            - generic [ref=f8e43]: subscribe shape
+            - generic [ref=f8e44]: authorized shape
+            - generic [ref=f8e45]: logical replication
+            - generic [ref=f8e46]: live changes
+          - generic [ref=f8e47]:
+            - generic [ref=f8e48]: re-renders
+            - generic [ref=f8e49]: local result
+        - generic [ref=f8e50]: green = local · blue = sync
+      - generic [ref=f8e53]: The UI always reads from the local TanStack DB collection. If the required data has not been synchronized, Electric loads the initial snapshot and continues streaming Postgres changes in the background.
+      - generic [ref=f8e54]: 9c
+    - text: → → →
+    - generic: Amazon Confidential
+  - generic [ref=f8e55]:
+    - button "‹ Prev" [ref=f8e56] [cursor=pointer]
+    - generic [ref=f8e57]: 11 / 22
+    - button "Next ›" [ref=f8e58] [cursor=pointer]
+    - button "⛶ Full" [ref=f8e59] [cursor=pointer]
+    - generic [ref=f8e60]: F = fullscreen · N = notes · P = presenter

@@ -1,0 +1,60 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - generic [ref=f3e6]:
+        - generic [ref=f3e7]: Local·First
+        - generic [ref=f3e8]: WebDevCon '26
+      - heading "A read, step by step" [level=2] [ref=f3e9]
+      - img [ref=f3e11]:
+        - generic [ref=f3e12]: the network
+        - generic [ref=f3e13]: in the browser
+        - generic [ref=f3e14]: your servers
+        - generic [ref=f3e22]:
+          - generic [ref=f3e23]: React Component
+          - generic [ref=f3e24]: renders the UI
+          - generic [ref=f3e25]: useLiveQuery()
+          - generic [ref=f3e26]: declares what it needs
+          - generic [ref=f3e27]: TanStack DB Collection
+          - generic [ref=f3e28]: local reactive data store
+          - generic [ref=f3e29]: Authorization Proxy
+          - generic [ref=f3e30]: auth + pins the WHERE
+          - generic [ref=f3e31]: Electric Sync Engine
+          - generic [ref=f3e32]: shape log over HTTP
+          - generic [ref=f3e33]: Postgres
+          - generic [ref=f3e34]: your existing database
+        - generic [ref=f3e38]: "ShapeStream: snapshot + live changes"
+        - generic [ref=f3e49]:
+          - generic [ref=f3e50]: "1"
+          - generic [ref=f3e51]: "8"
+          - generic [ref=f3e52]: "2"
+          - generic [ref=f3e53]: "3"
+          - generic [ref=f3e54]: "4"
+          - generic [ref=f3e55]: "5"
+          - generic [ref=f3e56]: "6"
+          - generic [ref=f3e57]: "7"
+          - generic [ref=f3e58]: "7"
+        - generic [ref=f3e59]:
+          - generic [ref=f3e60]:
+            - generic [ref=f3e61]: component subscribes
+            - generic [ref=f3e62]: registers live query
+            - generic [ref=f3e63]: opens shape subscription if needed
+            - generic [ref=f3e64]: authenticates and forwards
+            - generic [ref=f3e65]: authorized shape
+            - generic [ref=f3e66]: initial snapshot +
+            - generic [ref=f3e67]: logical replication
+            - generic [ref=f3e68]: snapshot, then live changes
+          - generic [ref=f3e69]:
+            - generic [ref=f3e70]: query updates incrementally;
+            - generic [ref=f3e71]: component re-renders
+            - generic [ref=f3e72]: returns local result
+        - generic [ref=f3e73]: green = local reads · blue = sync traffic that never stops
+      - generic [ref=f3e76]: The UI always reads from the local TanStack DB collection. If the required data has not been synchronized, Electric loads the initial snapshot and continues streaming Postgres changes in the background.
+      - generic [ref=f3e77]: 9c
+    - text: → → →
+    - generic: Amazon Confidential
+  - generic [ref=f3e78]:
+    - button "‹ Prev" [ref=f3e79] [cursor=pointer]
+    - generic [ref=f3e80]: 11 / 22
+    - button "Next ›" [ref=f3e81] [cursor=pointer]
+    - button "⛶ Full" [ref=f3e82] [cursor=pointer]
+    - generic [ref=f3e83]: F = fullscreen · N = notes · P = presenter

@@ -1,0 +1,46 @@
+- generic [active] [ref=f12e1]:
+  - generic [ref=f12e4]:
+    - generic [ref=f12e5]:
+      - generic [ref=f12e6]:
+        - generic [ref=f12e7]: Local·First
+        - generic [ref=f12e8]: WebDevCon '26
+      - heading "A read, step by step" [level=2] [ref=f12e9]
+      - img [ref=f12e11]:
+        - generic [ref=f12e12]: the network
+        - generic [ref=f12e13]: in the browser
+        - generic [ref=f12e14]: your servers
+        - generic [ref=f12e22]:
+          - generic [ref=f12e23]: React Component
+          - generic [ref=f12e24]: renders the UI
+          - generic [ref=f12e25]: useLiveQuery()
+          - generic [ref=f12e26]: declares what it needs
+          - generic [ref=f12e27]: TanStack DB Collection
+          - generic [ref=f12e28]: local reactive data store
+          - generic [ref=f12e29]: Authorization Proxy
+          - generic [ref=f12e30]: auth + pins the WHERE
+          - generic [ref=f12e31]: Electric Sync Engine
+          - generic [ref=f12e32]: shape log over HTTP
+          - generic [ref=f12e33]: Postgres
+          - generic [ref=f12e34]: your existing database
+        - generic [ref=f12e38]: "ShapeStream: snapshot + live changes"
+        - generic [ref=f12e39]:
+          - generic [ref=f12e40]:
+            - generic [ref=f12e41]: subscribes
+            - generic [ref=f12e42]: live query
+            - generic [ref=f12e43]: logical replication
+            - generic [ref=f12e44]: authorized shape
+            - generic [ref=f12e45]: subscribe shape
+            - generic [ref=f12e46]: live changes
+          - generic [ref=f12e47]:
+            - generic [ref=f12e48]: re-renders
+            - generic [ref=f12e49]: local result
+      - generic [ref=f12e52]: The UI always reads from the local TanStack DB collection. If the required data has not been synchronized, Electric loads the initial snapshot and continues streaming Postgres changes in the background.
+      - generic [ref=f12e53]: 9c
+    - text: → → →
+    - generic: Amazon Confidential
+  - generic [ref=f12e54]:
+    - button "‹ Prev" [ref=f12e55] [cursor=pointer]
+    - generic [ref=f12e56]: 11 / 22
+    - button "Next ›" [ref=f12e57] [cursor=pointer]
+    - button "⛶ Full" [ref=f12e58] [cursor=pointer]
+    - generic [ref=f12e59]: F = fullscreen · N = notes · P = presenter

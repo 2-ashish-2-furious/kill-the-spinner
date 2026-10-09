@@ -1,0 +1,88 @@
+      <!-- ========== 12 · A READ, STEP BY STEP ========== -->
+      <section class="slide">
+        <!-- NOTES: The read loop in detail, and note there is only ever one store. 1 the component subscribes. 2 useLiveQuery registers the live query against the TanStack DB collection. 3 the collection answers immediately from local state. 4 if that shape isn't subscribed yet the collection opens a ShapeStream to your authorization proxy — and a shape is just a filtered subset of a table, a WHERE clause the server pins, which is the whole of the next slide — 5 the proxy authenticates and forwards the authorized shape to the Electric sync engine, 6 Electric takes an initial snapshot and then follows Postgres logical replication, 7 snapshot then live changes stream back down through the proxy into the same collection, 8 the live query updates incrementally and the component re-renders. Steps 6 to 8 never stop — sync continues in the background for as long as the shape is subscribed. -->
+        <div class="brand"><span class="logo-l">Local<b>·</b>First</span><span class="logo-r">WebDevCon '26</span></div>
+        <h2>A read, <span class="hl">step by step</span></h2>
+        <div class="diagram">
+          <svg viewBox="0 0 960 372" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <!-- slim notched arrowheads, matching slide 9d/10: userSpaceOnUse keeps them a fixed
+                   size instead of being multiplied by stroke-width. -->
+              <marker id="a15" viewBox="0 0 12 8" markerUnits="userSpaceOnUse" markerWidth="24" markerHeight="16" refX="10.6" refY="4" orient="auto">
+                <path d="M1.2 1 L11 4 L1.2 7 L3.3 4 Z" fill="var(--pen-blue)"/>
+              </marker>
+              <marker id="a15g" viewBox="0 0 12 8" markerUnits="userSpaceOnUse" markerWidth="24" markerHeight="16" refX="10.6" refY="4" orient="auto">
+                <path d="M1.2 1 L11 4 L1.2 7 L3.3 4 Z" fill="var(--green)"/>
+              </marker>
+            </defs>
+
+            <path d="M475 40 V352" fill="none" stroke="var(--pen-slate)" stroke-width="2.4" stroke-dasharray="6 7" opacity=".65"/>
+            <text transform="translate(464,188) rotate(-90)" class="hlabel" font-size="16" fill="var(--pen-slate)" text-anchor="middle">the network</text>
+            <text x="144" y="32" class="hlabel" font-size="18" fill="var(--green)" text-anchor="middle">in the browser</text>
+            <text x="805" y="32" class="hlabel" font-size="18" fill="var(--pen-slate)" text-anchor="middle">your servers</text>
+
+            <!-- one instance of every component: three in the browser, three on your servers -->
+            <g filter="url(#rough)">
+              <rect x="36"  y="46"  width="216" height="58" rx="13" fill="#f2cfe2" stroke="var(--line)" stroke-width="2.6"/>
+              <rect x="36"  y="159" width="216" height="58" rx="13" fill="#f2cfe2" stroke="var(--line)" stroke-width="2.6"/>
+              <rect x="36"  y="272" width="216" height="58" rx="13" fill="#f2cfe2" stroke="var(--line)" stroke-width="2.6"/>
+              <rect x="700" y="272" width="210" height="58" rx="13" fill="#e2d3f3" stroke="var(--line)" stroke-width="2.6"/>
+              <rect x="700" y="159" width="210" height="58" rx="13" fill="#cfe0f7" stroke="var(--line)" stroke-width="2.6"/>
+              <rect x="700" y="46"  width="210" height="58" rx="13" fill="#bfe3dd" stroke="var(--line)" stroke-width="2.6"/>
+            </g>
+            <g style="font-family:var(--head)" font-weight="700" font-size="15" text-anchor="middle" fill="var(--ink)">
+              <text x="144" y="71">React Component</text><text x="144" y="89" font-size="11" font-weight="500">renders the UI</text>
+              <text x="144" y="184">useLiveQuery()</text><text x="144" y="202" font-size="11" font-weight="500">declares what it needs</text>
+              <text x="144" y="297">TanStack DB Collection</text><text x="144" y="315" font-size="11" font-weight="500">local reactive data store</text>
+              <text x="805" y="297">Authorization Proxy</text><text x="805" y="315" font-size="11" font-weight="500">auth + pins the WHERE</text>
+              <text x="805" y="184">Electric Sync Engine</text><text x="805" y="202" font-size="11" font-weight="500">shape log over HTTP</text>
+              <text x="805" y="71">Postgres</text><text x="805" y="89" font-size="11" font-weight="500">your existing database</text>
+            </g>
+
+            <!-- blue: subscription + sync traffic -->
+            <g fill="none" stroke="var(--pen-blue)" stroke-width="2.8">
+              <path d="M96 107 V155" marker-end="url(#a15)"/>
+              <path d="M96 220 V268" marker-end="url(#a15)"/>
+              <path d="M255 282 H694" marker-end="url(#a15)"/>
+              <path d="M760 270 V220" marker-end="url(#a15)"/>
+              <path d="M780 157 V106" marker-end="url(#a15)"/>
+              <path d="M830 106 V157" marker-end="url(#a15)"/>
+              <path d="M852 220 V268" marker-end="url(#a15)"/>
+              <path d="M696 324 H257" marker-end="url(#a15)"/>
+            </g>
+            <!-- green: local results and incremental re-render, never leaves the browser -->
+            <g fill="none" stroke="var(--green)" stroke-width="3.2">
+              <path d="M204 268 V220" marker-end="url(#a15g)"/>
+              <path d="M204 155 V107" marker-end="url(#a15g)"/>
+            </g>
+
+            <!-- the cross-network channel is the shape stream itself, not a component -->
+            <g filter="url(#rough)"><rect x="342" y="290" width="266" height="26" rx="13" fill="#dce7fb" stroke="var(--pen-blue)" stroke-width="2.2"/></g>
+            <text x="475" y="308" class="hlabel" font-size="15" fill="var(--pen-blue)" text-anchor="middle">ShapeStream: snapshot + live changes</text>
+
+            <!-- one or two words per arrow, each sitting against the arrow it names -->
+            <g class="hlabel" font-size="15">
+              <g fill="var(--pen-blue)">
+                <text x="106" y="136">subscribes</text>
+                <text x="106" y="249">live query</text>
+                <text x="768" y="136" text-anchor="end">logical replication</text>
+                <text x="748" y="249" text-anchor="end">authorized shape</text>
+                <text x="560" y="272" text-anchor="middle">subscribe shape</text>
+                <text x="560" y="342" text-anchor="middle">live changes</text>
+              </g>
+              <g fill="var(--green)">
+                <text x="214" y="136">re-renders</text>
+                <text x="214" y="249">local result</text>
+              </g>
+            </g>
+
+            <g filter="url(#glow)">
+              <path d="M-9 -7 L8 0 L-9 7 L-3 0 Z" fill="var(--pen-blue)" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+              <animateMotion dur="7s" repeatCount="indefinite" rotate="auto"
+                path="M258 282 H692 V324 H258 V282"/>
+            </g>
+          </svg>
+        </div>
+        <div class="cap">The UI always reads from the <span class="hl-b">local TanStack DB collection</span>. If the required data has not been synchronized, Electric loads the initial snapshot and continues streaming Postgres changes <span class="hl-b">in the background</span>.</div>
+        <div class="pnum">12</div>
+      </section>

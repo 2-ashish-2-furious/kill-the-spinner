@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: Local·First
+        - generic [ref=e8]: WebDevCon '26
+      - generic [ref=e9]:
+        - 'heading "Local-First: Kill the Spinner" [level=1] [ref=e10]': Local-First:Kill the Spinner
+        - generic [ref=e11]: Sync, don't fetch. Making applications feel instant.
+      - img [ref=e13]:
+        - generic [ref=e19]: no more spinner
+        - generic [ref=e27]: instant ⚡
+      - generic [ref=e28]: "1"
+    - text: → → →
+    - generic: Amazon Confidential
+  - generic [ref=e29]:
+    - button "‹ Prev" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]: 1 / 22
+    - button "Next ›" [ref=e32] [cursor=pointer]
+    - button "⛶ Full" [ref=e33] [cursor=pointer]
+    - generic [ref=e34]: F = fullscreen · N = notes · P = presenter
