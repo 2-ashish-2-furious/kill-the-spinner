@@ -14,6 +14,17 @@ The demo has two versions of the same screen:
 - **Before** (`/demo-before`): fetch-on-demand with tRPC. You see a spinner on every load, filter, and edit.
 - **After** (`/`, `/demo-large`): data syncs from Electric into TanStack DB collections, and the UI reads it with live queries. `/demo-large` uses query-driven sync over roughly 500k rows.
 
+## Architecture
+
+Reads and writes take separate paths. **Reads** stream from Postgres through Electric into local TanStack DB collections, and the UI queries those locally. **Writes** go through the existing tRPC API, and Postgres stays the source of truth.
+
+![Architecture: reads stream through Electric into TanStack DB; writes go through tRPC to Postgres](docs/architecture.png)
+
+A write, end to end:
+
+![Write path: optimistic update, tRPC mutation returns txid, change syncs back via Electric](docs/write-path.png)
+
+
 ## Quickstart
 
 Prerequisites: Docker, [Caddy](https://caddyserver.com) (run `caddy trust` once), and Node with pnpm. See `.tool-versions` for versions.

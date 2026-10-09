@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant UI as UI + TanStack DB
+  participant API as tRPC (server)
+  participant PG as Postgres
+  participant E as Electric
+
+  UI->>UI: Optimistic update
+  Note right of UI: No spinner
+  UI->>API: mutate()
+  API->>PG: INSERT/UPDATE in a transaction
+  API-->>UI: { txid }
+  PG-->>E: Logical replication
+  E-->>UI: Change arrives on the shape stream
+  UI->>UI: txid matched
+  Note right of UI: Optimistic state replaced<br/>by synced data
+  Note over UI,API: On failure, the optimistic change rolls back

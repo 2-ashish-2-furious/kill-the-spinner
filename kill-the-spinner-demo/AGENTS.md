@@ -50,7 +50,7 @@ This command will also report linter errors that were not automatically fixable.
 - **Frontend**: TanStack Start (SSR framework for React and other frameworks) with file-based routing in `src/routes/`
 - **Database**: PostgreSQL with Drizzle ORM, schema in `src/db/schema.ts`
 - **Electric**: Real-time sync service on port 30000
-- **Services**: Docker Compose setup (Postgres on 54321, Electric on 30000)
+- **Services**: Docker Compose setup (Postgres on 54323, Electric on 30000)
 - **Styling**: Tailwind CSS v4
 - **Authentication**: better-auth
 - **API**: tRPC v10 for mutations with full e2e type safety, Electric shapes for real-time reads

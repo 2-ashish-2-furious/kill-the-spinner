@@ -498,7 +498,7 @@ If Caddy fails to start:
 | ------------------------ | ------------------------------------------- | ------------------------------------------------------------------ |
 | **Docker not running**   | `docker compose ps` shows nothing           | Start Docker Desktop/daemon                                        |
 | **Caddy not trusted**    | SSL warnings in browser                     | Run `caddy trust` (see Caddy section below)                        |
-| **Port conflicts**       | Postgres (54321) or Electric (30000) in use | Stop conflicting services or change ports in `docker-compose.yaml` |
+| **Port conflicts**       | Postgres (54323) or Electric (30000) in use | Stop conflicting services or change ports in `docker-compose.yaml` |
 | **Missing .env**         | Database connection errors                  | Copy `.env.example` to `.env`                                      |
 | **Caddy fails to start** | `Caddy exited with code 1`                  | Run `caddy start` manually to see the error                        |
 

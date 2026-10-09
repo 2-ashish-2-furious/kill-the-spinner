@@ -1,0 +1,29 @@
+flowchart LR
+  subgraph Browser
+    UI["React UI<br/>useLiveQuery"]
+    DB["TanStack DB collections<br/>todos · projects · users<br/>demo-issues (on-demand)"]
+    SQLite[("wa-sqlite + OPFS<br/>persisted demo-issues")]
+    UI <-->|"instant local reads,<br/>optimistic writes"| DB
+    DB <-.-> SQLite
+  end
+
+  Caddy["Caddy<br/>HTTPS + HTTP/2"]
+
+  subgraph Server["TanStack Start server"]
+    Auth["Better Auth<br/>session check"]
+    Proxy["Shape proxy routes<br/>/api/todos, /api/projects, ...<br/>server-side WHERE filters"]
+    TRPC["tRPC mutations<br/>returns txid"]
+  end
+
+  Electric["Electric<br/>sync engine"]
+  PG[("Postgres<br/>wal_level=logical")]
+
+  DB -->|"shape stream (HTTP long-poll)"| Caddy
+  DB -->|"mutations"| Caddy
+  Caddy --> Proxy
+  Caddy --> TRPC
+  Proxy --> Auth
+  TRPC --> Auth
+  Proxy -->|"/v1/shape"| Electric
+  Electric -->|"logical replication"| PG
+  TRPC -->|"Drizzle writes"| PG
